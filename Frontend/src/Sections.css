@@ -1,0 +1,372 @@
+/* The rendered website sections.
+   Every colour, radius and font comes from the document's design tokens
+   (set as custom properties on `.website-canvas`), so a theme change
+   repaints the whole page without any per-template stylesheet. */
+
+.website-canvas {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  isolation: isolate;
+}
+
+.canvas-section {
+  position: relative;
+  border: 1.5px solid transparent;
+  border-radius: 8px;
+  transition: border-color .16s ease, background-color .16s ease;
+  padding: 2px;
+  min-width: 0;
+}
+
+/* The wrapper every section renders inside. It carries the shared layout
+   props (panel background, padding, border, radius, width), so those
+   controls work for all eleven section types at once.
+   The wrapper is centred; the alignment *inside* it is each section's
+   own business, so nothing here touches the children. */
+.lx-section {
+  min-width: 0;
+  box-sizing: border-box;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (hover: hover) {
+  .canvas-section:hover { border-color: color-mix(in srgb, var(--lx-accent) 45%, transparent); }
+}
+
+.canvas-section.is-selected {
+  border-color: var(--lx-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--lx-accent) 18%, transparent);
+}
+
+.canvas-section:focus-visible {
+  outline: 2px solid var(--lx-accent);
+  outline-offset: 3px;
+}
+
+/* ---- Profile --------------------------------------------------------- */
+
+.lx-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.lx-profile--left { align-items: flex-start; text-align: left; }
+.lx-profile--right { align-items: flex-end; text-align: right; }
+.lx-profile--row { flex-direction: row; align-items: center; text-align: left; gap: 18px; }
+
+.lx-avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  flex: none;
+}
+
+.lx-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.lx-avatar__initial {
+  font-weight: 700;
+  line-height: 1;
+  font-family: var(--lx-heading-font);
+  mix-blend-mode: normal;
+}
+
+.lx-profile__name {
+  margin: 10px 0 0;
+  font-size: calc(26px * var(--lx-scale));
+  line-height: 1.15;
+  letter-spacing: -.02em;
+}
+
+.lx-profile__headline {
+  margin: 4px 0 0;
+  font-size: calc(15px * var(--lx-scale));
+  font-weight: 600;
+  letter-spacing: .01em;
+}
+
+.lx-profile__bio {
+  margin: 8px 0 0;
+  font-size: calc(15px * var(--lx-scale));
+  line-height: 1.55;
+  max-width: 46ch;
+}
+
+/* ---- Text ------------------------------------------------------------ */
+
+.lx-text {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.lx-text--heading {
+  line-height: 1.1;
+  letter-spacing: -.02em;
+  text-wrap: balance;
+}
+
+.lx-text--lead {
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+/* ---- Image ----------------------------------------------------------- */
+
+.lx-figure { margin: 0; }
+
+.lx-figure__frame {
+  overflow: hidden;
+  background: color-mix(in srgb, var(--lx-border) 55%, transparent);
+}
+
+.lx-figure__frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.lx-figure figcaption {
+  margin-top: 10px;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* ---- Buttons --------------------------------------------------------- */
+
+.lx-button-row { display: flex; }
+
+.lx-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  text-decoration: none;
+  line-height: 1.2;
+  text-align: center;
+  transition: transform .16s ease, filter .16s ease, box-shadow .16s ease;
+  cursor: pointer;
+  border: 0;
+}
+
+.lx-button--minimal { padding-left: 0 !important; padding-right: 0 !important; }
+.lx-button--minimal span { text-decoration: underline; text-underline-offset: 4px; }
+
+@media (hover: hover) {
+  .lx-button:hover { filter: brightness(1.06); transform: translateY(-1px); }
+  .lx-button--shadow:hover { transform: translateY(2px); box-shadow: 0 4px 0 var(--lx-accent); }
+}
+
+.lx-button:focus-visible {
+  outline: 2px solid var(--lx-accent);
+  outline-offset: 3px;
+}
+
+/* ---- Social links ---------------------------------------------------- */
+
+.lx-socials { display: flex; flex-wrap: wrap; align-items: center; }
+
+.lx-social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: transform .16s ease, background-color .16s ease, color .16s ease;
+}
+
+.lx-social--plain { text-decoration: underline; text-underline-offset: 4px; font-size: 14px; }
+
+@media (hover: hover) {
+  .lx-social:not(.lx-social--plain):hover { transform: translateY(-2px); }
+}
+
+/* ---- Link card ------------------------------------------------------- */
+
+.lx-card {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  text-decoration: none;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.lx-card__media {
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  margin: 10px 10px 0;
+}
+
+.lx-card__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.lx-card__body { padding: 18px 20px; }
+
+.lx-card__meta {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.lx-card__title {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.3;
+  letter-spacing: -.01em;
+}
+
+.lx-card__description {
+  margin: 7px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.lx-card__accent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+.lx-card--flat .lx-card__body { padding-left: 16px; }
+.lx-card--flat { border-left: 0; }
+
+@media (hover: hover) {
+  .lx-card:hover { transform: translateY(-2px); }
+}
+
+/* ---- Gallery --------------------------------------------------------- */
+
+.lx-gallery { display: grid; }
+
+.lx-gallery__item { margin: 0; }
+
+.lx-gallery__frame {
+  overflow: hidden;
+  background: color-mix(in srgb, var(--lx-border) 55%, transparent);
+}
+
+.lx-gallery__frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .3s ease;
+}
+
+.lx-gallery figcaption { margin-top: 7px; font-size: 12px; text-align: center; }
+
+@media (hover: hover) {
+  .lx-gallery__item:hover img { transform: scale(1.04); }
+}
+
+/* ---- Video ----------------------------------------------------------- */
+
+.lx-video {
+  overflow: hidden;
+  background: #000;
+}
+
+.lx-video video { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ---- Contact --------------------------------------------------------- */
+
+.lx-contact { display: grid; gap: 10px; }
+.lx-contact--inline { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.lx-contact--cards { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+
+.lx-contact__item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 14px 16px;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+
+.lx-contact__label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.lx-contact__value { font-size: 14px; }
+
+.lx-contact__link { text-decoration: none; font-size: 14px; }
+.lx-contact__link:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---- Divider & spacer ------------------------------------------------ */
+
+.lx-divider { border: 0; border-top-style: solid; margin: 0; }
+.lx-divider--dashed { border-top-style: dashed; }
+.lx-divider--dotted { border-top-style: dotted; }
+
+.lx-divider--gradient { border: 0; height: 2px; }
+.lx-divider--gradient span { display: block; width: 100%; height: 100%; }
+
+.lx-spacer { width: 100%; }
+
+/* ---- Placeholder ----------------------------------------------------- */
+
+.lx-placeholder {
+  border: 1.5px dashed;
+  display: grid;
+  place-items: center;
+  min-height: 92px;
+  font-size: 13px;
+  text-align: center;
+  padding: 20px;
+  width: 100%;
+}
+
+/* ---- Layouts --------------------------------------------------------- */
+
+.lx-layout--split .lx-profile--row { gap: 20px; }
+
+.lx-layout--grid .lx-gallery { gap: 14px; }
+
+.lx-layout--editorial .lx-text--heading {
+  font-family: var(--lx-heading-font);
+  letter-spacing: .01em;
+}
+
+.lx-layout--card .lx-card,
+.lx-layout--card .lx-button { box-shadow: 0 4px 20px -14px rgba(0, 0, 0, .35); }
+
+.lx-layout--bold .lx-text--heading { text-transform: none; letter-spacing: -.03em; }
+
+.lx-layout--showcase .lx-figure__frame { box-shadow: 0 20px 44px -26px rgba(0, 0, 0, .6); }
+
+.lx-layout--masonry .lx-gallery { grid-template-rows: masonry; }
+
+.lx-layout--minimal .lx-profile { gap: 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .canvas-section,
+  .lx-button,
+  .lx-social,
+  .lx-card,
+  .lx-gallery__frame img { transition: none !important; }
+  .lx-button:hover,
+  .lx-social:hover,
+  .lx-card:hover,
+  .lx-gallery__item:hover img { transform: none !important; }
+}
