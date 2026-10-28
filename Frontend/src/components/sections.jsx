@@ -1,6 +1,12 @@
 import { assetUrl } from '../lib/api'
 import { SocialGlyph, ArrowRightIcon, ExternalIcon, CartIcon, DownloadIcon, PlayIcon, HeartIcon, StarIcon, MailIcon } from './icons'
 import { PLATFORM_LABELS } from './platforms'
+import { useMemo } from 'react'
+import pinkHtml from '../html-designs/pink_profile.html?raw'
+import purpleHtml from '../html-designs/purple_profile.html?raw'
+import nightHtml from '../html-designs/nightblue_profile.html?raw'
+import skyHtml from '../html-designs/blueSKY_profile.html?raw'
+import inkHtml from '../html-designs/black_profile.html?raw'
 
 /**
  * The individual section renderers.
@@ -499,8 +505,77 @@ function sectionFrameStyle(props, tokens) {
     fontFamily: typography.bodyFont,
   }
 }
+/* -------------------------------------------------------------------------- */
+/* Designed pages: a finished HTML design shown in a sandboxed frame           */
+/* -------------------------------------------------------------------------- */
+
+const DESIGNS = {
+  pink:      { html: pinkHtml,   ratio: '430 / 860', name: 'h1.name',    brand: '.brand', bio: 'p.bio', avatar: '.av' },
+  purple:    { html: purpleHtml, ratio: '430 / 905', name: '#title',                       bio: '#bio',  avatar: '.avatar' },
+  nightblue: { html: nightHtml,  ratio: '430 / 921', name: 'h1.name', first: true,         bio: '.bio',  avatar: '.avatar div' },
+  bluesky:   { html: skyHtml,    ratio: '430 / 917', name: '#name span',                   bio: '#bio',  avatar: '.avatar' },
+  ink:       { html: inkHtml,    ratio: '430 / 918', name: '#name span',                   bio: '#bio',  avatar: '#avatar' },
+}
+
+const PAGE_FIELDS = [
+  'brand', 'socInstagram', 'socFacebook', 'socLinkedin', 'socYoutube', 'socX',
+  'ql1Title', 'ql1Handle', 'ql1Url', 'ql2Title', 'ql2Handle', 'ql2Url',
+  'ql3Title', 'ql3Handle', 'ql3Url', 'ql4Title', 'ql4Handle', 'ql4Url',
+  'email', 'phone', 'location', 'website',
+  'findTitle', 'findSub', 'mapLabel', 'mapUrl', 'ctaLabel', 'ctaUrl',
+]
+
+function buildSrcDoc(design, values) {
+  const data = JSON.stringify({
+    sel: { name: design.name, brand: design.brand || '', bio: design.bio, avatar: design.avatar, first: Boolean(design.first) },
+    name: values.name,
+    bio: values.bio,
+    image: values.image,
+    fields: values.fields || {},
+  }).replace(/</g, '\\u003c')
+
+  // Values are only ever written with textContent, href or an <img> src, never as markup.
+  const script = `<script>(function(){var d=${data};var done=false;function q(s){return s?document.querySelector(s):null}
+function go(){if(done)return;done=true;
+if(d.name){var n=q(d.sel.name);if(n){if(d.sel.first){for(var i=0;i<n.childNodes.length;i++){var c=n.childNodes[i];if(c.nodeType===3&&c.nodeValue.trim()){c.nodeValue=d.name;break}}}else{n.textContent=d.name}}
+var b=q(d.sel.brand);if(b)b.textContent=d.name}
+if(d.bio){var p=q(d.sel.bio);if(p)p.textContent=d.bio}
+if(d.image){var a=q(d.sel.avatar);if(a){var im=document.createElement('img');im.src=d.image;im.alt='';im.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:9;border-radius:inherit';a.appendChild(im)}}
+var f=d.fields;
+document.querySelectorAll('[data-f]').forEach(function(el){var v=f[el.getAttribute('data-f')];if(v)el.textContent=v});
+document.querySelectorAll('[data-href]').forEach(function(el){var v=f[el.getAttribute('data-href')];if(!v)return;var pre=el.getAttribute('data-pre');
+if(pre){v=pre+String(v).replace(/\\s+/g,'')}else if(!/^(https?:|mailto:|tel:)/i.test(v)){v='https://'+v}
+el.setAttribute('href',v);el.setAttribute('target','_blank');el.setAttribute('rel','noopener noreferrer')})}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();addEventListener('load',go)})()<\/script>`
+
+  const end = design.html.lastIndexOf('</body>')
+  return end < 0 ? design.html + script : design.html.slice(0, end) + script + design.html.slice(end)
+}
+
+function HtmlPageSection({ props }) {
+  const design = DESIGNS[props.style] || DESIGNS.pink
+  const image = props.image ? new URL(assetUrl(props.image), window.location.href).href : ''
+  const fields = {}
+  for (const key of PAGE_FIELDS) if (props[key]) fields[key] = String(props[key])
+  const fieldsKey = JSON.stringify(fields)
+
+  const srcDoc = useMemo(
+    () => buildSrcDoc(design, { name: props.name || '', bio: props.bio || '', image, fields: JSON.parse(fieldsKey) }),
+    [design, props.name, props.bio, image, fieldsKey],
+  )
+  return (
+    <div className="lx-htmlpage" style={{ aspectRatio: design.ratio }}>
+      <iframe
+        title="Designed page"
+        srcDoc={srcDoc}
+        sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
+      />
+    </div>
+  )
+}
 
 /* -------------------------------------------------------------------------- */
+
 
 const RENDERERS = {
   profile: ProfileSection,
@@ -514,7 +589,9 @@ const RENDERERS = {
   contact: ContactSection,
   divider: DividerSection,
   spacer: SpacerSection,
+  'html-page': HtmlPageSection,
 }
+
 
 /** Render one section. Unknown types render nothing rather than throwing. */
 export function SectionView({ section, tokens }) {
@@ -524,7 +601,7 @@ export function SectionView({ section, tokens }) {
 
   return (
     <div className="lx-section" style={sectionFrameStyle(props, tokens)}>
-      <Renderer props={props} tokens={tokens} />
+         <Renderer props={props} tokens={tokens} sectionId={section.id} />
     </div>
   )
 }

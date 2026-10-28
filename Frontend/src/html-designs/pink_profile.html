@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rock Agency</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#fdf0f2;font-family:'Figtree',system-ui,sans-serif;color:#5a1a3c}
+body{display:flex;justify-content:center;align-items:center;background:#fdf0f2}
+a{color:inherit;text-decoration:none}
+
+/* Phone canvas: exact 800x1600 (1:2). 1 design px = var(--u) */
+.phone{position:relative;width:min(100vw,50vh,430px);aspect-ratio:1/2;container-type:inline-size;overflow:hidden;
+  background:#fdf0f2;}
+.stage{height:200cqw;bottom:auto}
+/* On a real phone: fill the whole screen, no frame */
+@media(max-width:600px){
+  html,body{background:#fdf0f2}
+  .phone{width:100vw;height:100vh;height:100dvh;aspect-ratio:auto}
+}
+.stage{--u:.125cqw;position:absolute;inset:0}
+.a{position:absolute;left:calc(var(--x)*var(--u));top:calc(var(--y)*var(--u));width:calc(var(--w)*var(--u));height:calc(var(--h)*var(--u))}
+.f{font-size:calc(var(--f)*var(--u))}
+svg{display:block}
+.bg{position:absolute;inset:0;width:100%;height:100%}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(calc(22*var(--u)));transition:opacity .6s ease,transform .6s cubic-bezier(.2,.8,.2,1)}
+.rv.on{opacity:1;transform:none}
+
+/* header */
+.logo{color:#5a1a3c}
+.logo .tw{transform-origin:center;animation:tw 2.6s ease-in-out infinite}
+.logo .tw2{animation-delay:.9s}
+@keyframes tw{50%{opacity:.35;transform:scale(.7)}}
+.brand{display:flex;align-items:center;font-weight:600;line-height:1;color:#5a1a3c}
+.menu{border-radius:50%;background:#f8cdd7;display:grid;place-items:center;color:#5a1a3c;cursor:pointer;position:absolute;overflow:hidden;transition:transform .25s,background .25s}
+.menu:hover{transform:rotate(90deg) scale(1.06);background:#f4b9c8}
+.menu svg{width:46%;height:46%}
+
+/* avatar */
+.av{border-radius:50%;background:#f9cdd7;overflow:hidden;animation:fl 5s ease-in-out infinite;box-shadow:0 calc(8*var(--u)) calc(24*var(--u)) rgba(200,100,140,.18)}
+@keyframes fl{50%{transform:translateY(calc(-6*var(--u)))}}
+.rays line{stroke:#b24a7a;stroke-width:5;stroke-linecap:round;animation:ray 2.4s ease-in-out infinite}
+.rays .r2{animation-delay:.25s}.rays .r3{animation-delay:.5s}
+@keyframes ray{50%{opacity:.35}}
+.heart{animation:hb 2.2s ease-in-out infinite;transform-origin:center}
+@keyframes hb{0%,100%{transform:scale(1) rotate(8deg)}50%{transform:scale(1.18) rotate(8deg)}}
+
+.name{text-align:center;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;letter-spacing:-.2px}
+.bio{text-align:center;color:#6e5a65;line-height:1.43;font-weight:400}
+
+/* social circles */
+.soc{border-radius:50%;background:#f8cbd7;display:grid;place-items:center;color:#6a1c48;position:absolute;overflow:hidden;transition:transform .3s,background .3s,color .3s}
+.soc svg{width:44%;height:44%}
+.soc:hover{transform:translateY(calc(-5*var(--u))) scale(1.08);background:#b8487a;color:#fff}
+
+.sec{display:flex;align-items:center;gap:calc(12*var(--u));font-weight:600;color:#5a1a3c}
+.sec svg{width:calc(30*var(--u));height:calc(30*var(--u))}
+
+/* cards */
+.card{position:absolute;display:flex;align-items:center;background:linear-gradient(135deg,#fffafb,#fdf1f4);border:1px solid rgba(255,255,255,.95);
+  border-radius:calc(22*var(--u));box-shadow:0 calc(4*var(--u)) calc(14*var(--u)) rgba(190,110,140,.2);overflow:hidden;cursor:pointer;
+  transition:transform .3s,box-shadow .3s}
+.card:hover{transform:translateY(calc(-3*var(--u)));box-shadow:0 calc(10*var(--u)) calc(22*var(--u)) rgba(190,100,135,.3)}
+.card:active{transform:scale(.98)}
+.card::after{content:"";position:absolute;top:0;left:-50%;width:35%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.7),transparent);transform:skewX(-18deg);transition:left .7s}
+.card:hover::after{left:130%}
+.ic{flex:none;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(145deg,#e585a5,#b94678);box-shadow:0 calc(3*var(--u)) calc(8*var(--u)) rgba(170,60,110,.3)}
+.ic svg{width:50%;height:50%}
+.tx{line-height:1.3;min-width:0}
+.tx b{display:block;font-weight:600;color:#5a1a3c;white-space:nowrap}
+.tx small{display:block;color:#7b6671;white-space:nowrap}
+.chev{position:absolute;right:calc(26*var(--u));width:calc(18*var(--u));height:calc(18*var(--u));color:#5a1a3c;transition:transform .25s}
+.card:hover .chev{transform:translateX(calc(5*var(--u)))}
+
+/* find us */
+.btn-maps{position:absolute;display:flex;align-items:center;justify-content:center;gap:calc(14*var(--u));color:#fff;font-weight:500;border-radius:40px;
+  background:linear-gradient(90deg,#c1507e,#a63a6a);box-shadow:0 calc(4*var(--u)) calc(10*var(--u)) rgba(160,50,100,.3);transition:transform .25s}
+.btn-maps:hover{transform:scale(1.05)}
+.btn-maps svg{width:calc(15*var(--u));height:calc(15*var(--u))}
+.map{position:absolute;border-radius:calc(24*var(--u));overflow:hidden;background:#fbe9ed}
+.pin{animation:bn 2s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes bn{50%{transform:translateY(calc(-8*var(--u)))}}
+.ping{animation:pg 2s ease-out infinite;transform-origin:center;transform-box:fill-box}
+@keyframes pg{from{transform:scale(.4);opacity:.7}to{transform:scale(2.2);opacity:0}}
+
+/* CTA */
+.cta{position:absolute;display:flex;align-items:center;color:#fff;font-weight:600;border-radius:60px;overflow:hidden;cursor:pointer;
+  background:linear-gradient(90deg,#a94679,#c9658f);box-shadow:0 calc(8*var(--u)) calc(20*var(--u)) rgba(170,60,110,.35);animation:cp 3s ease-in-out infinite;transition:transform .25s}
+@keyframes cp{50%{box-shadow:0 calc(10*var(--u)) calc(28*var(--u)) rgba(200,80,130,.55)}}
+.cta::after{content:"";position:absolute;top:0;left:-40%;width:30%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);animation:sh 3.8s ease-in-out infinite}
+@keyframes sh{0%{left:-40%}55%,100%{left:140%}}
+.cta:hover{transform:scale(1.02)}
+.cta .arr{position:absolute;right:calc(52*var(--u));width:calc(24*var(--u));height:calc(24*var(--u));transition:transform .25s}
+.cta:hover .arr{transform:translateX(calc(6*var(--u)))}
+.cta .sp{position:absolute;left:calc(52*var(--u));width:calc(32*var(--u));height:calc(32*var(--u));animation:tw 2.6s ease-in-out infinite}
+
+.ripple{position:absolute;border-radius:50%;background:rgba(190,70,120,.25);transform:scale(0);animation:rp .6s linear;pointer-events:none}
+@keyframes rp{to{transform:scale(4);opacity:0}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+<defs>
+<symbol id="ig" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.3" cy="6.7" r="1.2" fill="currentColor"/></symbol>
+<symbol id="fb" viewBox="0 0 24 24"><path fill="currentColor" d="M14 8V6.5c0-.7.3-1 1-1h2V2h-3c-3 0-4 2-4 4v2H7.500v3.500H10V22h4V11.500h2.800L17.300 8z"/></symbol>
+<symbol id="in" viewBox="0 0 24 24"><path fill="currentColor" d="M4 9h3.500v11H4zM5.700 3.800a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM10 9h3.300v1.600c.5-.9 1.700-1.900 3.500-1.900 3.600 0 4.200 2.400 4.200 5.400V20h-3.500v-5.200c0-1.300 0-2.900-1.800-2.900s-2.100 1.400-2.100 2.800V20H10z"/></symbol>
+<symbol id="yt" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M7 5h10a5 5 0 0 1 5 5v4a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-4a5 5 0 0 1 5-5zm3 4v6l5.200-3z"/></symbol>
+<symbol id="x" viewBox="0 0 24 24"><path fill="currentColor" d="M17.800 3h3.100l-6.800 7.700L22 21h-6.200l-4.900-6.300L5.300 21H2.200l7.300-8.300L2 3h6.400l4.400 5.800zm-1.100 16.200h1.700L7.400 4.700H5.600z"/></symbol>
+<symbol id="gh" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 0 0-3.160 19.490c.5.090.68-.22.68-.48v-1.700c-2.780.6-3.370-1.340-3.370-1.340-.45-1.160-1.110-1.470-1.110-1.470-.9-.62.07-.6.07-.6 1 .07 1.530 1.030 1.530 1.030.89 1.520 2.340 1.080 2.900.83.09-.65.35-1.080.63-1.330-2.220-.25-4.550-1.110-4.550-4.940 0-1.090.39-1.980 1.030-2.680-.1-.25-.45-1.270.1-2.640 0 0 .84-.27 2.750 1.020a9.500 9.500 0 0 1 5 0c1.910-1.290 2.750-1.020 2.750-1.020.55 1.370.2 2.390.1 2.640.64.7 1.030 1.590 1.030 2.680 0 3.840-2.340 4.690-4.570 4.930.36.31.68.92.68 1.860v2.760c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></symbol>
+<symbol id="mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 7.500l8 6 8-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+<symbol id="ph" viewBox="0 0 24 24"><path fill="currentColor" d="M6.600 3.500l2.400-.5 1.800 4.200-1.900 1.400a11 11 0 0 0 5.500 5.500l1.400-1.900 4.200 1.800-.5 2.400a2.500 2.500 0 0 1-2.500 2A15.500 15.500 0 0 1 4.600 6a2.500 2.500 0 0 1 2-2.500z"/></symbol>
+<symbol id="pin" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22s-7-6.200-7-11.800a7 7 0 0 1 14 0C19 15.800 12 22 12 22z"/><circle cx="12" cy="10" r="2.700" fill="#fff"/></symbol>
+<symbol id="gl" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></g></symbol>
+<symbol id="lk" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/></symbol>
+<symbol id="ms" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12v5a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h9"/><path d="M4 8l8 6 4-3"/><path d="M20 2v5M17.500 4.500h5"/></g></symbol>
+<symbol id="sp" viewBox="0 0 24 24"><path fill="currentColor" d="M13 4c.7 4.500 2.300 6.300 7 7-4.700.7-6.300 2.500-7 7-.7-4.500-2.300-6.300-7-7 4.700-.7 6.300-2.500 7-7z"/><path fill="currentColor" d="M5 2c.3 1.800 1 2.500 2.800 2.800C6 5.100 5.300 5.800 5 7.600 4.700 5.800 4 5.100 2.200 4.800 4 4.500 4.700 3.800 5 2z"/></symbol>
+<symbol id="ch" viewBox="0 0 24 24"><path d="M9 4l8 8-8 8" fill="none" stroke="currentColor" stroke-width="2.300" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ar" viewBox="0 0 24 24"><path d="M3 12h17M13 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.900" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ne" viewBox="0 0 24 24"><path d="M6 18L18 6M8 6h10v10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</defs>
+</svg>
+
+<div class="phone"><div class="stage">
+
+<!-- soft blobs -->
+<svg class="bg" viewBox="0 0 800 1600" preserveAspectRatio="none" fill="#f9d4db">
+  <path d="M0 0H105C95 50 70 90 40 120 25 135 10 150 0 160z"/>
+  <path d="M650 0H800V135C760 150 720 120 695 85 675 55 665 25 650 0z" opacity=".85"/>
+  <path d="M0 215C40 190 85 200 78 255 70 320 40 380 0 425z" opacity=".75"/>
+  <path d="M800 1400C770 1410 735 1445 730 1500 725 1550 760 1580 800 1600z" opacity=".8"/>
+  <path d="M0 1510C40 1500 90 1540 110 1600H0z"/>
+  <path d="M0 1570C200 1545 560 1600 800 1560V1600H0z" opacity=".6"/>
+</svg>
+
+<!-- header -->
+<svg class="a rv logo" style="--x:96;--y:44;--w:60;--h:60" viewBox="0 0 60 60"><g fill="currentColor"><path d="M26 28l7-7 14 14c2 2 2 5 0 7l-2 2c-2 2-5 2-7 0z" transform="rotate(0)"/><path class="tw" d="M45 3c1 7 3 9 9 10-6 1-8 3-9 10-1-7-3-9-9-10 6-1 8-3 9-10z"/><path class="tw tw2" d="M14 14c.6 3.500 2 4.800 5.500 5.500C16 20.200 14.600 21.500 14 25c-.6-3.500-2-4.800-5.500-5.500C12 18.800 13.400 17.500 14 14z"/><circle cx="6" cy="30" r="2.300"/><circle cx="24" cy="6" r="2"/></g></svg>
+<div class="a rv brand f" style="--x:176;--y:40;--w:260;--h:50;--f:27">Rock Agency</div>
+<div class="menu a rv" style="--x:637;--y:43;--w:64;--h:64"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.200" stroke-linecap="round"/></svg></div>
+
+<!-- avatar -->
+<div class="a rv av" style="--x:309;--y:103;--w:184;--h:184">
+<svg viewBox="0 0 184 184"><defs><linearGradient id="hg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b9805a"/><stop offset="1" stop-color="#8a5638"/></linearGradient></defs>
+<path d="M30 190c4-30 28-44 62-44s58 14 62 44z" fill="#ef5a96"/>
+<path d="M70 150c4 14 40 14 44 0l-4-14H74z" fill="#f2b99a"/>
+<path d="M78 148c0 10 6 22 14 24 8-2 14-14 14-24z" fill="#e24785" opacity=".0"/>
+<path d="M66 150l-6 40M118 150l6 40" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+<ellipse cx="92" cy="96" rx="40" ry="46" fill="#f6c3a2"/>
+<g fill="url(#hg)"><circle cx="58" cy="62" r="19"/><circle cx="76" cy="46" r="21"/><circle cx="98" cy="42" r="22"/><circle cx="119" cy="50" r="20"/><circle cx="130" cy="68" r="17"/><circle cx="52" cy="82" r="12"/><circle cx="133" cy="86" r="11"/></g>
+<path d="M58 88c0-22 14-30 34-30s34 8 34 30c-10-10-22-14-34-14s-24 4-34 14z" fill="url(#hg)"/>
+<g fill="none" stroke="#2b2430" stroke-width="3.500"><rect x="60" y="86" width="28" height="24" rx="9"/><rect x="96" y="86" width="28" height="24" rx="9"/><path d="M88 96h8"/></g>
+<circle cx="75" cy="98" r="4.500" fill="#3a2a1e"/><circle cx="111" cy="98" r="4.500" fill="#3a2a1e"/>
+<path d="M78 123c8 8 20 8 28 0" stroke="#b4604a" stroke-width="3.500" fill="none" stroke-linecap="round"/>
+<path d="M72 120c0 14 40 14 40 0" fill="none"/>
+</svg></div>
+<svg class="a rv rays" style="--x:240;--y:150;--w:320;--h:90" viewBox="0 0 320 90"><g><line class="r1" x1="23" y1="12" x2="45" y2="25"/><line class="r2" x1="15" y1="47" x2="41" y2="47"/><line class="r3" x1="24" y1="80" x2="45" y2="69"/><line class="r1" x1="297" y1="12" x2="275" y2="25"/><line class="r2" x1="305" y1="47" x2="279" y2="47"/><line class="r3" x1="296" y1="80" x2="275" y2="69"/></g></svg>
+<svg class="a rv" style="--x:668;--y:192;--w:40;--h:40" viewBox="0 0 40 40"><path class="heart" d="M20 33C8 25 6 17 10 12c4-4 9-2 10 3 2-6 8-7 11-3 4 5 0 14-11 21z" fill="none" stroke="#e6a3b9" stroke-width="2.600" stroke-linejoin="round"/></svg>
+
+<!-- name + bio -->
+<h1 class="a rv name f" style="--x:100;--y:296;--w:602;--h:62;--f:46">Rock Agency</h1>
+<p class="a rv bio f" style="--x:140;--y:362;--w:522;--h:92;--f:21.500">Rock Agency is a digital agency company and website studio specializing in products, commerce, and SaaS website.</p>
+
+<!-- socials -->
+<a class="soc a rv" href="#" style="--x:191;--y:474;--w:64;--h:64"><svg><use href="#ig"/></svg></a>
+<a class="soc a rv" href="#" style="--x:280;--y:474;--w:64;--h:64"><svg><use href="#fb"/></svg></a>
+<a class="soc a rv" href="#" style="--x:370;--y:474;--w:64;--h:64"><svg><use href="#in"/></svg></a>
+<a class="soc a rv" href="#" style="--x:459;--y:474;--w:64;--h:64"><svg><use href="#yt"/></svg></a>
+<a class="soc a rv" href="#" style="--x:547;--y:474;--w:64;--h:64"><svg><use href="#x"/></svg></a>
+
+<!-- quick links -->
+<div class="a rv sec f" style="--x:104;--y:572;--w:300;--h:36;--f:23.500"><svg><use href="#lk"/></svg>Quick Links</div>
+
+<a class="card a rv" href="#" style="--x:100;--y:621;--w:602;--h:81">
+  <div class="ic" style="width:calc(56*var(--u));height:calc(56*var(--u));margin-left:calc(21*var(--u))"><svg><use href="#ig"/></svg></div>
+  <div class="tx" style="margin-left:calc(24*var(--u))"><b class="f" style="--f:19">Instagram</b><small class="f" style="--f:16">@rockagency</small></div>
+  <svg class="chev"><use href="#ch"/></svg></a>
+<a class="card a rv" href="#" style="--x:100;--y:712;--w:602;--h:81">
+  <div class="ic" style="width:calc(56*var(--u));height:calc(56*var(--u));margin-left:calc(21*var(--u))"><svg><use href="#yt"/></svg></div>
+  <div class="tx" style="margin-left:calc(24*var(--u))"><b class="f" style="--f:19">YouTube</b><small class="f" style="--f:16">@rockagency</small></div>
+  <svg class="chev"><use href="#ch"/></svg></a>
+<a class="card a rv" href="#" style="--x:100;--y:806;--w:602;--h:81">
+  <div class="ic" style="width:calc(56*var(--u));height:calc(56*var(--u));margin-left:calc(21*var(--u))"><svg style="width:62%;height:62%"><use href="#in"/></svg></div>
+  <div class="tx" style="margin-left:calc(24*var(--u))"><b class="f" style="--f:19">LinkedIn</b><small class="f" style="--f:16">rock-agency</small></div>
+  <svg class="chev"><use href="#ch"/></svg></a>
+<a class="card a rv" href="#" style="--x:100;--y:899;--w:602;--h:82">
+  <div class="ic" style="width:calc(56*var(--u));height:calc(56*var(--u));margin-left:calc(21*var(--u))"><svg style="width:68%;height:68%"><use href="#gh"/></svg></div>
+  <div class="tx" style="margin-left:calc(24*var(--u))"><b class="f" style="--f:19">GitHub</b><small class="f" style="--f:16">github.com/rockagency</small></div>
+  <svg class="chev"><use href="#ch"/></svg></a>
+
+<!-- get in touch -->
+<div class="a rv sec f" style="--x:103;--y:1012;--w:320;--h:36;--f:23.500"><svg style="width:calc(32*var(--u));height:calc(32*var(--u))"><use href="#ms"/></svg>Get in Touch</div>
+
+<a class="card a rv" href="#" style="--x:100;--y:1064;--w:293;--h:82">
+  <div class="ic" style="width:calc(56*var(--u));height:calc(56*var(--u));margin-left:calc(19*var(--u))"><svg><use href="#mail"/></svg></div>
+  <div class="tx" style="margin-left:calc(22*var(--u))"><b class="f" style="--f:18">Email Us</b><small class="f" style="--f:15.500">hello@rockagency.com</small></div></a>
+<a class="card a rv" href="#" style="--x:413;--y:1064;--w:293;--h:82">
+  <div class="ic" style="width:calc(56*var(--u));height:calc(56*var(--u));margin-left:calc(22*var(--u))"><svg><use href="#ph"/></svg></div>
+  <div class="tx" style="margin-left:calc(22*var(--u))"><b class="f" style="--f:18">Call Us</b><small class="f" style="--f:15.500">+971 50 123 4567</small></div></a>
+<a class="card a rv" href="#" style="--x:100;--y:1161;--w:293;--h:84">
+  <div class="ic" style="width:calc(56*var(--u));height:calc(56*var(--u));margin-left:calc(19*var(--u))"><svg style="width:54%;height:54%"><use href="#pin"/></svg></div>
+  <div class="tx" style="margin-left:calc(22*var(--u))"><b class="f" style="--f:18">Our Location</b><small class="f" style="--f:15.500">Union Coop Al Dubai</small></div></a>
+<a class="card a rv" href="#" style="--x:413;--y:1161;--w:293;--h:84">
+  <div class="ic" style="width:calc(56*var(--u));height:calc(56*var(--u));margin-left:calc(22*var(--u))"><svg><use href="#gl"/></svg></div>
+  <div class="tx" style="margin-left:calc(22*var(--u))"><b class="f" style="--f:18">Website</b><small class="f" style="--f:15.500">www.rockagency.com</small></div></a>
+
+<!-- find us -->
+<div class="card a rv" style="--x:100;--y:1267;--w:605;--h:199;align-items:flex-start;cursor:default">
+  <div class="ic" style="position:absolute;left:calc(18*var(--u));top:calc(15*var(--u));width:calc(54*var(--u));height:calc(54*var(--u));background:linear-gradient(145deg,#b94678,#8f2b5a)"><svg style="width:56%;height:56%"><use href="#pin"/></svg></div>
+  <div class="tx" style="position:absolute;left:calc(85*var(--u));top:calc(15*var(--u))"><b class="f" style="--f:19">Find Us</b><small class="f" style="--f:15.500">Visit our office &amp; say hi!</small></div>
+  <a class="btn-maps f" href="#" style="--f:15.500;left:calc(429*var(--u));top:calc(16*var(--u));width:calc(160*var(--u));height:calc(38*var(--u))">View on Maps<svg><use href="#ne"/></svg></a>
+  <div class="map" style="left:calc(19*var(--u));top:calc(75*var(--u));width:calc(564*var(--u));height:calc(110*var(--u))">
+    <svg viewBox="0 0 564 110" width="100%" height="100%" preserveAspectRatio="none">
+      <rect width="564" height="110" fill="#fbe8ec"/>
+      <g fill="#e8e3c8" opacity=".9"><path d="M60 0h40l-18 40H50z"/><path d="M130 55l55-12 12 38-52 12z"/><path d="M270 0h35l5 30h-40z"/><path d="M490 8l50 8-6 40-50-8z"/><path d="M345 70h60l-8 40h-60z" opacity=".7"/></g>
+      <g stroke="#fff" stroke-width="10" stroke-linecap="round" fill="none"><path d="M-10 90L120 -5"/><path d="M40 115L190 0"/><path d="M-10 40L560 75"/><path d="M230 -5L330 115"/><path d="M400 -5L470 115"/><path d="M510 -5L600 100"/></g>
+      <g stroke="#fff" stroke-width="5" stroke-linecap="round" fill="none"><path d="M120 115L250 30"/><path d="M330 30L564 20"/></g>
+      <g fill="#cfe0b0"><circle cx="108" cy="30" r="9"/><circle cx="380" cy="70" r="6"/><circle cx="510" cy="55" r="9"/><circle cx="245" cy="45" r="5"/></g>
+      <text x="64" y="82" font-size="15" fill="#6e5a65" font-family="Figtree,sans-serif">Masjid</text>
+      <text x="468" y="75" font-size="15" fill="#6e5a65" font-family="Figtree,sans-serif" text-anchor="middle">Tennis Court</text>
+      <circle class="ping" cx="281" cy="55" r="12" fill="#c1507e"/>
+      <g class="pin"><path fill="#a63a6a" d="M281 62s-17-14-17-28a17 17 0 0 1 34 0c0 14-17 28-17 28z"/><circle cx="281" cy="34" r="6.500" fill="#fff"/></g>
+      <rect x="226" y="69" width="113" height="28" rx="14" fill="#fff" opacity=".85"/>
+      <text x="282" y="88" font-size="15" fill="#5a1a3c" font-family="Figtree,sans-serif" text-anchor="middle">Union Coop Al</text>
+    </svg></div>
+</div>
+
+<!-- CTA -->
+<a class="cta a rv f" href="#" style="--x:104;--y:1485;--w:594;--h:68;--f:21"><svg class="sp"><use href="#sp"/></svg><span style="margin-left:calc(114*var(--u))">Explore Our Work</span><svg class="arr"><use href="#ar"/></svg></a>
+
+</div></div>
+
+<script>
+/* One orchestrated entrance: top to bottom */
+const items=[...document.querySelectorAll('.rv')].sort((a,b)=>parseFloat(a.style.getPropertyValue('--y'))-parseFloat(b.style.getPropertyValue('--y')));
+items.forEach((el,i)=>setTimeout(()=>el.classList.add('on'),120+i*55));
+
+/* Ripple on tap for cards, circles, buttons */
+document.querySelectorAll('.card,.soc,.cta,.btn-maps,.menu').forEach(el=>{
+  el.addEventListener('click',e=>{
+    if(el.getAttribute('href')==='#')e.preventDefault();
+    const r=el.getBoundingClientRect(),d=Math.max(r.width,r.height)/2.5,s=document.createElement('span');
+    s.className='ripple';
+    s.style.cssText=`width:${d}px;height:${d}px;left:${e.clientX-r.left-d/2}px;top:${e.clientY-r.top-d/2}px`;
+    el.style.position=getComputedStyle(el).position==='static'?'relative':'';
+    el.appendChild(s);setTimeout(()=>s.remove(),600);
+  });
+});
+
+/* Avatar gently follows the pointer */
+const av=document.querySelector('.av'),ph=document.querySelector('.phone');
+ph.addEventListener('pointermove',e=>{
+  const r=ph.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+  av.style.translate=`${x*8}px ${y*6}px`;
+});
+</script>
+</body>
+</html>
