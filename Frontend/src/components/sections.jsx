@@ -7,6 +7,7 @@ import purpleHtml from '../html-designs/purple_profile.html?raw'
 import nightHtml from '../html-designs/nightblue_profile.html?raw'
 import skyHtml from '../html-designs/blueSKY_profile.html?raw'
 import inkHtml from '../html-designs/black_profile.html?raw'
+import { extractFields, normalizeHref } from '../lib/htmlFields'
 
 /**
  * The individual section renderers.
@@ -509,7 +510,7 @@ function sectionFrameStyle(props, tokens) {
 /* Designed pages: a finished HTML design shown in a sandboxed frame           */
 /* -------------------------------------------------------------------------- */
 
-const DESIGNS = {
+export const DESIGNS = {
   pink:      { html: pinkHtml,   ratio: '430 / 860', name: 'h1.name',    brand: '.brand', bio: 'p.bio', avatar: '.av' },
   purple:    { html: purpleHtml, ratio: '430 / 905', name: '#title',                       bio: '#bio',  avatar: '.avatar' },
   nightblue: { html: nightHtml,  ratio: '430 / 921', name: 'h1.name', first: true,         bio: '.bio',  avatar: '.avatar div' },
@@ -517,13 +518,6 @@ const DESIGNS = {
   ink:       { html: inkHtml,    ratio: '430 / 918', name: '#name span',                   bio: '#bio',  avatar: '#avatar' },
 }
 
-const PAGE_FIELDS = [
-  'brand', 'socInstagram', 'socFacebook', 'socLinkedin', 'socYoutube', 'socX',
-  'ql1Title', 'ql1Handle', 'ql1Url', 'ql2Title', 'ql2Handle', 'ql2Url',
-  'ql3Title', 'ql3Handle', 'ql3Url', 'ql4Title', 'ql4Handle', 'ql4Url',
-  'email', 'phone', 'location', 'website',
-  'findTitle', 'findSub', 'mapLabel', 'mapUrl', 'ctaLabel', 'ctaUrl',
-]
 
 function buildSrcDoc(design, values) {
   const data = JSON.stringify({
@@ -531,21 +525,22 @@ function buildSrcDoc(design, values) {
     name: values.name,
     bio: values.bio,
     image: values.image,
-    fields: values.fields || {},
+    edits: values.edits || {},
   }).replace(/</g, '\\u003c')
 
-  // Values are only ever written with textContent, href or an <img> src, never as markup.
-  const script = `<script>(function(){var d=${data};var done=false;function q(s){return s?document.querySelector(s):null}
+  // Values are only ever written with nodeValue, textContent or href, never as markup.
+  const script = `<script>(function(){var d=${data};var done=false;
+var extract=${extractFields.toString()};
+var fixHref=${normalizeHref.toString()};
+function q(s){return s?document.querySelector(s):null}
 function go(){if(done)return;done=true;
+var ex=extract(document.body);
 if(d.name){var n=q(d.sel.name);if(n){if(d.sel.first){for(var i=0;i<n.childNodes.length;i++){var c=n.childNodes[i];if(c.nodeType===3&&c.nodeValue.trim()){c.nodeValue=d.name;break}}}else{n.textContent=d.name}}
 var b=q(d.sel.brand);if(b)b.textContent=d.name}
 if(d.bio){var p=q(d.sel.bio);if(p)p.textContent=d.bio}
 if(d.image){var a=q(d.sel.avatar);if(a){var im=document.createElement('img');im.src=d.image;im.alt='';im.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:9;border-radius:inherit';a.appendChild(im)}}
-var f=d.fields;
-document.querySelectorAll('[data-f]').forEach(function(el){var v=f[el.getAttribute('data-f')];if(v)el.textContent=v});
-document.querySelectorAll('[data-href]').forEach(function(el){var v=f[el.getAttribute('data-href')];if(!v)return;var pre=el.getAttribute('data-pre');
-if(pre){v=pre+String(v).replace(/\\s+/g,'')}else if(!/^(https?:|mailto:|tel:)/i.test(v)){v='https://'+v}
-el.setAttribute('href',v);el.setAttribute('target','_blank');el.setAttribute('rel','noopener noreferrer')})}
+ex.texts.forEach(function(node,i){var v=d.edits['t'+i];if(typeof v!=='string')return;var m=node.nodeValue.match(/^(\\s*)[\\s\\S]*?(\\s*)$/);node.nodeValue=(m?m[1]:'')+v+(m?m[2]:'')});
+ex.links.forEach(function(el,i){var v=d.edits['l'+i];if(typeof v!=='string')return;var h=fixHref(v);if(!h)return;el.setAttribute('href',h);if(h.charAt(0)!=='#'){el.setAttribute('target','_blank');el.setAttribute('rel','noopener noreferrer')}})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();addEventListener('load',go)})()<\/script>`
 
   const end = design.html.lastIndexOf('</body>')
@@ -555,14 +550,17 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 function HtmlPageSection({ props }) {
   const design = DESIGNS[props.style] || DESIGNS.pink
   const image = props.image ? new URL(assetUrl(props.image), window.location.href).href : ''
-  const fields = {}
-  for (const key of PAGE_FIELDS) if (props[key]) fields[key] = String(props[key])
-  const fieldsKey = JSON.stringify(fields)
+  const editsKey = JSON.stringify(props.edits || [])
 
-  const srcDoc = useMemo(
-    () => buildSrcDoc(design, { name: props.name || '', bio: props.bio || '', image, fields: JSON.parse(fieldsKey) }),
-    [design, props.name, props.bio, image, fieldsKey],
-  )
+  const srcDoc = useMemo(() => {
+    const edits = {}
+    for (const entry of JSON.parse(editsKey)) {
+      if (typeof entry.text === 'string' && entry.id.startsWith('t')) edits[entry.id] = entry.text
+      if (typeof entry.href === 'string' && entry.id.startsWith('l')) edits[entry.id] = entry.href
+    }
+    return buildSrcDoc(design, { name: props.name || '', bio: props.bio || '', image, edits })
+  }, [design, props.name, props.bio, image, editsKey])
+
   return (
     <div className="lx-htmlpage" style={{ aspectRatio: design.ratio }}>
       <iframe

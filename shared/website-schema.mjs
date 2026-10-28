@@ -423,43 +423,25 @@ export const SECTION_DEFS = {
       ...common,
       height: number(4, 320, 48),
     },
-  },
-      'html-page': {
+  },  'html-page': {
     label: 'Designed page',
     group: 'website',
     icon: 'grid',
-    description: 'A fully designed page. Edit the text, links, contact details and photo.',
+    description: 'A fully designed page. Edit every text and link, plus the name, bio and photo.',
     spec: {
       ...common,
       style: enumOf(['pink', 'purple', 'nightblue', 'bluesky', 'ink'], 'pink'),
-      brand: string(60, ''),
       name: string(80, ''),
       bio: text(400, ''),
       image: url(''),
-
-      socInstagram: url(''),
-      socFacebook: url(''),
-      socLinkedin: url(''),
-      socYoutube: url(''),
-      socX: url(''),
-
-      ql1Title: string(40, ''), ql1Handle: string(80, ''), ql1Url: url(''),
-      ql2Title: string(40, ''), ql2Handle: string(80, ''), ql2Url: url(''),
-      ql3Title: string(40, ''), ql3Handle: string(80, ''), ql3Url: url(''),
-      ql4Title: string(40, ''), ql4Handle: string(80, ''), ql4Url: url(''),
-
-      email: string(120, ''),
-      phone: string(40, ''),
-      location: string(80, ''),
-      website: string(120, ''),
-
-      findTitle: string(40, ''),
-      findSub: string(80, ''),
-      mapLabel: string(30, ''),
-      mapUrl: url(''),
-
-      ctaLabel: string(40, ''),
-      ctaUrl: url(''),
+      edits: list(
+        object({
+          id: string(20, ''),
+          text: text(600, ''),
+          href: string(300, ''),
+        }),
+        300,
+      ),
     },
   },
   
