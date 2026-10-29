@@ -434,13 +434,29 @@ export const SECTION_DEFS = {
       name: string(80, ''),
       bio: text(400, ''),
       image: url(''),
-      edits: list(
+            edits: list(
         object({
           id: string(20, ''),
           text: text(600, ''),
           href: string(300, ''),
+          del: string(1, ''),
+          font: string(60, ''),
+          size: string(6, ''),
+          weight: string(4, ''),
+          lh: string(6, ''),
+          ls: string(6, ''),
+          color: string(9, ''),
+          align: string(6, ''),
         }),
         300,
+      ),
+      extra: list(
+        object({
+          id: string(20, ''),
+          text: string(60, ''),
+          href: string(300, ''),
+        }),
+        20,
       ),
     },
   },

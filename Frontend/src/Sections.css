@@ -337,7 +337,7 @@
   width: 100%;
 }
 
-.lx-htmlpage{width:100%;max-width:430px;margin:0 auto;overflow:hidden;border-radius:28px;box-shadow:0 20px 50px -24px rgba(0,0,0,.5)}
+.lx-htmlpage{width:100%;max-width:100%;margin:0 auto;overflow:hidden;border-radius:28px;box-shadow:0 20px 50px -24px rgba(0,0,0,.5)}
 .lx-htmlpage iframe{width:100%;height:100%;border:0;display:block}
 /* In the editor and on template cards, clicks select the block instead of going into the design. */
 .canvas-block__select .lx-htmlpage iframe,
@@ -376,3 +376,6 @@
   .lx-card:hover,
   .lx-gallery__item:hover img { transform: none !important; }
 }
+
+.lx-extra-links { width: 100%; margin: 14px auto 0; display: flex; flex-direction: column; gap: 10px; }
+.lx-extra-link { display: block; text-align: center; padding: 14px 18px; border-radius: 999px; background: var(--lx-accent); color: var(--lx-accent-text); font-weight: 600; text-decoration: none; }

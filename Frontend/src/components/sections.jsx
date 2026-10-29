@@ -528,24 +528,46 @@ function buildSrcDoc(design, values) {
     edits: values.edits || {},
   }).replace(/</g, '\\u003c')
 
-  // Values are only ever written with nodeValue, textContent or href, never as markup.
+  const fontLinks = (values.fonts || [])
+    .map((f) => `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${encodeURIComponent(f).replace(/%20/g, '+')}&display=swap">`)
+    .join('')
+
+  // Values are only written with nodeValue, textContent, style or href, never as markup.
   const script = `<script>(function(){var d=${data};var done=false;
 var extract=${extractFields.toString()};
 var fixHref=${normalizeHref.toString()};
 function q(s){return s?document.querySelector(s):null}
+var sized=[];
+function resize(){sized.forEach(function(o){o.el.style.fontSize='';var c=parseFloat(getComputedStyle(o.el).fontSize);if(c)o.el.style.fontSize=(c*o.k)+'px'})}
 function go(){if(done)return;done=true;
 var ex=extract(document.body);
 if(d.name){var n=q(d.sel.name);if(n){if(d.sel.first){for(var i=0;i<n.childNodes.length;i++){var c=n.childNodes[i];if(c.nodeType===3&&c.nodeValue.trim()){c.nodeValue=d.name;break}}}else{n.textContent=d.name}}
 var b=q(d.sel.brand);if(b)b.textContent=d.name}
 if(d.bio){var p=q(d.sel.bio);if(p)p.textContent=d.bio}
 if(d.image){var a=q(d.sel.avatar);if(a){var im=document.createElement('img');im.src=d.image;im.alt='';im.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:9;border-radius:inherit';a.appendChild(im)}}
-ex.texts.forEach(function(node,i){var v=d.edits['t'+i];if(typeof v!=='string')return;var m=node.nodeValue.match(/^(\\s*)[\\s\\S]*?(\\s*)$/);node.nodeValue=(m?m[1]:'')+v+(m?m[2]:'')});
-ex.links.forEach(function(el,i){var v=d.edits['l'+i];if(typeof v!=='string')return;var h=fixHref(v);if(!h)return;el.setAttribute('href',h);if(h.charAt(0)!=='#'){el.setAttribute('target','_blank');el.setAttribute('rel','noopener noreferrer')}})}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();addEventListener('load',go)})()<\/script>`
+ex.texts.forEach(function(node,i){var e=d.edits['t'+i];if(!e)return;
+if(e.text){var m=node.nodeValue.match(/^(\\s*)[\\s\\S]*?(\\s*)$/);node.nodeValue=(m?m[1]:'')+e.text+(m?m[2]:'')}
+var el=node.parentElement;if(!el)return;var s=el.style;
+if(e.font)s.fontFamily='"'+e.font+'",sans-serif';
+if(e.weight)s.fontWeight=e.weight;
+if(e.lh)s.lineHeight=e.lh;
+if(e.ls)s.letterSpacing=(Number(e.ls)/100)+'em';
+if(e.color)s.color=e.color;
+if(e.align)s.textAlign=e.align;
+if(e.size&&Number(e.size)!==100)sized.push({el:el,k:Number(e.size)/100})});
+ex.links.forEach(function(el,i){var e=d.edits['l'+i];if(!e)return;
+if(e.del){el.style.display='none';return}
+if(e.href){var h=fixHref(e.href);if(h){el.setAttribute('href',h);if(h.charAt(0)!=='#'){el.setAttribute('target','_blank');el.setAttribute('rel','noopener noreferrer')}}}});
+resize();addEventListener('resize',resize)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();
+addEventListener('load',function(){go();resize()})})()<\/script>`
 
   const end = design.html.lastIndexOf('</body>')
-  return end < 0 ? design.html + script : design.html.slice(0, end) + script + design.html.slice(end)
+  const injected = fontLinks + script
+  return end < 0 ? design.html + injected : design.html.slice(0, end) + injected + design.html.slice(end)
 }
+
+const EDIT_KEYS = ['text', 'href', 'del', 'font', 'size', 'weight', 'lh', 'ls', 'color', 'align']
 
 function HtmlPageSection({ props }) {
   const design = DESIGNS[props.style] || DESIGNS.pink
@@ -555,20 +577,41 @@ function HtmlPageSection({ props }) {
   const srcDoc = useMemo(() => {
     const edits = {}
     for (const entry of JSON.parse(editsKey)) {
-      if (typeof entry.text === 'string' && entry.id.startsWith('t')) edits[entry.id] = entry.text
-      if (typeof entry.href === 'string' && entry.id.startsWith('l')) edits[entry.id] = entry.href
+      const e = {}
+      for (const key of EDIT_KEYS) if (entry[key]) e[key] = entry[key]
+      if (Object.keys(e).length) edits[entry.id] = e
     }
-    return buildSrcDoc(design, { name: props.name || '', bio: props.bio || '', image, edits })
+    const fonts = [...new Set(Object.values(edits).map((e) => e.font).filter(Boolean))]
+    return buildSrcDoc(design, { name: props.name || '', bio: props.bio || '', image, edits, fonts })
   }, [design, props.name, props.bio, image, editsKey])
 
+  const extra = (props.extra || []).filter((link) => link.text)
+
   return (
-    <div className="lx-htmlpage" style={{ aspectRatio: design.ratio }}>
-      <iframe
-        title="Designed page"
-        srcDoc={srcDoc}
-        sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
-      />
-    </div>
+    <>
+      <div className="lx-htmlpage" style={{ aspectRatio: design.ratio }}>
+        <iframe
+          title="Designed page"
+          srcDoc={srcDoc}
+          sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
+        />
+      </div>
+      {extra.length ? (
+        <div className="lx-extra-links">
+          {extra.map((link) => (
+            <a
+              key={link.id}
+              className="lx-extra-link"
+              href={normalizeHref(link.href) || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {link.text}
+            </a>
+          ))}
+        </div>
+      ) : null}
+    </>
   )
 }
 
