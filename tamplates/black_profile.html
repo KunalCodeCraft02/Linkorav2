@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>@rockagency</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* Everything is sized in "u" units: 1u = phone width / 749 (matches the reference 749x1600 design) */
+  :root{ --u:.5px; --ink:#171c28; --bg:#f6f4f1; --muted:#7b7b7b; --line:#e7e4e0; }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:#d9d6d2;font-family:'Poppins',system-ui,sans-serif;color:var(--ink);
+    display:flex;justify-content:center;align-items:center;overflow:hidden;
+  }
+  .phone{
+    position:relative;width:calc(var(--u)*749);height:calc(var(--u)*1600);
+    background:var(--bg);overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+    border-radius:calc(var(--u)*0);
+  }
+  @media (min-width:600px){ .phone{border-radius:calc(var(--u)*50)} }
+  .scroll{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+  .scroll::-webkit-scrollbar{display:none}
+  .page{position:relative;width:100%;height:calc(var(--u)*1600)}
+
+  /* paper grain */
+  .grain{position:absolute;inset:0;opacity:.35;pointer-events:none;mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .12 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>")}
+
+  /* top dripping shape */
+  .drip{position:absolute;left:0;top:0;width:100%;height:calc(var(--u)*320);overflow:visible}
+  .drip path.main{fill:#171c28}
+  .drop{fill:#171c28}
+
+  /* avatar */
+  .avatar-wrap{position:absolute;left:calc(var(--u)*273);top:calc(var(--u)*88);
+    width:calc(var(--u)*204);height:calc(var(--u)*207)}
+  .avatar{width:100%;height:100%;border-radius:50%;border:calc(var(--u)*5) solid #fff;overflow:hidden;
+    background:#999;box-shadow:0 calc(var(--u)*10) calc(var(--u)*30) rgba(0,0,0,.18);position:relative}
+  .avatar svg{width:100%;height:100%;display:block;transform:scale(1.04)}
+  .avatar::after{content:"";position:absolute;inset:0;border-radius:50%;
+    background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.35) 50%,transparent 60%);
+    transform:translateX(-120%);animation:shine 5s ease-in-out 2s infinite}
+  @keyframes shine{0%{transform:translateX(-120%)}30%,100%{transform:translateX(120%)}}
+
+  /* text */
+  .center{position:absolute;left:0;width:100%;text-align:center}
+  .name{top:calc(var(--u)*313);font-size:calc(var(--u)*37);font-weight:500;letter-spacing:-.2px;
+    display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*12)}
+  .badge{width:calc(var(--u)*29);height:calc(var(--u)*29);position:relative}
+  .bio{top:calc(var(--u)*376);font-size:calc(var(--u)*22);line-height:calc(var(--u)*33);color:#767676;font-weight:400;padding:0 calc(var(--u)*140)}
+
+  /* stats */
+  .stats{position:absolute;left:calc(var(--u)*93);top:calc(var(--u)*470);width:calc(var(--u)*564);
+    display:flex;height:calc(var(--u)*62)}
+  .stat{flex:1;text-align:center;position:relative}
+  .stat+.stat::before{content:"";position:absolute;left:0;top:calc(var(--u)*8);height:calc(var(--u)*48);width:1px;background:#e1ddd8}
+  .stat b{display:block;font-size:calc(var(--u)*22);font-weight:500;line-height:calc(var(--u)*34)}
+  .stat span{display:block;font-size:calc(var(--u)*17);color:#8b8b8b;margin-top:calc(var(--u)*4)}
+
+  /* follow button */
+  .follow{position:absolute;left:calc(var(--u)*118);top:calc(var(--u)*565);width:calc(var(--u)*514);height:calc(var(--u)*71);
+    border-radius:999px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;
+    text-decoration:none;font-size:calc(var(--u)*22);font-weight:400;overflow:hidden;
+    box-shadow:0 calc(var(--u)*12) calc(var(--u)*24) rgba(23,28,40,.22);transition:transform .25s,box-shadow .25s}
+  .follow:active{transform:scale(.97)}
+  .follow .ig{position:absolute;left:calc(var(--u)*127);width:calc(var(--u)*32);height:calc(var(--u)*32)}
+  .follow .txt{position:absolute;left:calc(var(--u)*182)}
+  .follow .arr{position:absolute;right:calc(var(--u)*34);width:calc(var(--u)*18);height:calc(var(--u)*18);transition:transform .3s}
+  .follow:hover .arr{transform:translate(3px,-3px)}
+  .follow::before{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;
+    background:linear-gradient(100deg,transparent,rgba(255,255,255,.18),transparent);transform:skewX(-20deg);
+    animation:sweep 4.5s ease-in-out 2.5s infinite}
+  @keyframes sweep{0%{left:-60%}35%,100%{left:140%}}
+
+  /* link cards */
+  .links{position:absolute;left:calc(var(--u)*93);top:calc(var(--u)*677);width:calc(var(--u)*564)}
+  .card{position:relative;display:flex;align-items:center;width:100%;height:calc(var(--u)*100);margin-bottom:calc(var(--u)*16);
+    border:1px solid var(--line);border-radius:calc(var(--u)*30);background:rgba(255,255,255,.35);
+    text-decoration:none;color:var(--ink);overflow:hidden;
+    transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .3s,background .3s,border-color .3s;
+    will-change:transform}
+  .card:first-child{height:calc(var(--u)*96)}
+  .card:hover{background:#fff;box-shadow:0 calc(var(--u)*14) calc(var(--u)*30) rgba(23,28,40,.09);border-color:#dcd8d3}
+  .card:active{transform:scale(.98)!important}
+  .ico{flex:none;width:calc(var(--u)*70);height:calc(var(--u)*70);margin-left:calc(var(--u)*20);border-radius:50%;background:#ebebeb;
+    display:flex;align-items:center;justify-content:center;transition:background .3s,transform .4s}
+  .ico svg{width:calc(var(--u)*34);height:calc(var(--u)*34);stroke:var(--ink);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .ico svg .f{fill:var(--ink);stroke:none}
+  .card:hover .ico{background:var(--ink);transform:rotate(-8deg) scale(1.06)}
+  .card:hover .ico svg{stroke:#fff}
+  .card:hover .ico svg .f{fill:#fff}
+  .card:hover .ico svg .k{fill:var(--ink)}
+  .card .t{margin-left:calc(var(--u)*32);flex:1}
+  .card .t b{display:block;font-size:calc(var(--u)*20);font-weight:500;line-height:calc(var(--u)*30)}
+  .card .t span{display:block;font-size:calc(var(--u)*16);color:#8a8a8a;line-height:calc(var(--u)*26)}
+  .card .go{width:calc(var(--u)*24);height:calc(var(--u)*24);margin-right:calc(var(--u)*34);stroke:var(--ink);fill:none;stroke-width:1.6;
+    stroke-linecap:round;stroke-linejoin:round;transition:transform .3s}
+  .card:hover .go{transform:translateX(6px)}
+  .ripple{position:absolute;border-radius:50%;background:rgba(23,28,40,.12);transform:scale(0);pointer-events:none;animation:rip .65s ease-out forwards}
+  @keyframes rip{to{transform:scale(1);opacity:0}}
+
+  /* footer socials */
+  .social{position:absolute;left:calc(var(--u)*93);top:calc(var(--u)*1409);width:calc(var(--u)*564);height:calc(var(--u)*44);
+    display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*33)}
+  .social::before,.social::after{content:"";position:absolute;top:50%;height:1px;background:#e3dfda;width:calc(var(--u)*118)}
+  .social::before{left:0}.social::after{right:0}
+  .social a{width:calc(var(--u)*42);height:calc(var(--u)*42);border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;
+    transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+  .social a:hover{transform:translateY(-5px) scale(1.12)}
+  .social svg{width:calc(var(--u)*20);height:calc(var(--u)*20);fill:#fff}
+  .tag{top:calc(var(--u)*1472);font-size:calc(var(--u)*14);letter-spacing:calc(var(--u)*3.4);color:#9c9892;font-weight:400}
+  .tag i{font-style:normal;margin:0 calc(var(--u)*10)}
+
+  /* dunes */
+  .dunes{position:absolute;left:0;bottom:0;width:100%;height:calc(var(--u)*125);pointer-events:none}
+
+  /* entrance start states (JS animates them in) */
+  .pre{opacity:0}
+</style>
+</head>
+<body>
+
+<div class="phone" id="phone">
+  <div class="scroll"><div class="page" id="page">
+    <div class="grain"></div>
+
+    <!-- dripping top -->
+    <svg class="drip" id="dripSvg" viewBox="0 0 749 320" preserveAspectRatio="none">
+      <path class="main" id="dripPath" d=""/>
+      <ellipse class="drop" id="drop" cx="655" cy="162" rx="7" ry="11"/>
+      <ellipse class="drop" id="drop2" cx="0" cy="0" rx="5" ry="8" opacity="0"/>
+    </svg>
+
+    <!-- avatar -->
+    <div class="avatar-wrap pre" id="avatarWrap">
+      <div class="avatar" id="avatar">
+        <svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#8f9aa6"/><stop offset=".45" stop-color="#d7b79b"/><stop offset=".7" stop-color="#c3c3c6"/><stop offset="1" stop-color="#5d6b7c"/>
+            </linearGradient>
+            <linearGradient id="mt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#56677a"/><stop offset="1" stop-color="#2f3b4a"/></linearGradient>
+            <radialGradient id="glow" cx=".55" cy=".45" r=".6"><stop offset="0" stop-color="#ffe3c2" stop-opacity=".75"/><stop offset="1" stop-color="#ffe3c2" stop-opacity="0"/></radialGradient>
+          </defs>
+          <rect width="200" height="200" fill="url(#sky)"/>
+          <rect width="200" height="200" fill="url(#glow)"/>
+          <path d="M0 112 L28 98 L52 110 L84 92 L116 108 L150 94 L200 112 L200 200 L0 200Z" fill="url(#mt)" opacity=".85"/>
+          <path d="M0 130 C40 118 80 134 120 124 C150 118 180 126 200 120 L200 200 L0 200Z" fill="#46566a" opacity=".8"/>
+          <!-- person -->
+          <path d="M42 205 C44 160 70 148 100 146 C132 148 158 160 160 205Z" fill="#1c2027"/>
+          <path d="M88 142 C88 150 112 150 114 140 L112 124 L90 124Z" fill="#3a2d28"/>
+          <path d="M80 108 C78 78 92 62 112 66 C128 70 134 88 130 108 C128 124 112 134 98 132 C86 130 81 120 80 108Z" fill="#46352f"/>
+          <path d="M80 100 C78 74 92 56 112 60 C128 64 136 80 130 98 C122 82 100 74 80 100Z" fill="#17120f"/>
+          <path d="M118 90 L134 88 L135 94 L119 96Z" fill="#111" opacity=".9"/>
+          <path d="M70 160 C80 148 90 146 100 146 C86 154 80 170 78 205 L62 205Z" fill="#2a2f38" opacity=".7"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- name -->
+    <div class="center name pre" id="name">
+      <span>@rockagency</span>
+      <svg class="badge" id="badge" viewBox="0 0 24 24">
+        <path fill="#2f86d6" d="M12 1.5l2.4 1.7 2.9-.2 1.2 2.7 2.6 1.3-.1 2.9 1.6 2.4-1.6 2.4.1 2.9-2.6 1.3-1.2 2.7-2.9-.2L12 22.5l-2.4-1.7-2.9.2-1.2-2.7-2.6-1.3.1-2.9L1.4 12l1.6-2.4-.1-2.9 2.6-1.3 1.2-2.7 2.9.2z"/>
+        <path d="M7.6 12.2l3 3 5.8-6" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <p class="center bio pre" id="bio">Digital agency specializing in products, commerce and SaaS websites.</p>
+
+    <!-- stats -->
+    <div class="stats">
+      <div class="stat pre"><b data-count="124">0</b><span>Posts</span></div>
+      <div class="stat pre"><b data-count="12.5" data-suffix="K" data-dec="1">0</b><span>Followers</span></div>
+      <div class="stat pre"><b data-count="48">0</b><span>Following</span></div>
+    </div>
+
+    <!-- follow -->
+    <a class="follow pre" id="follow" href="https://instagram.com/rockagency" target="_blank" rel="noopener">
+      <svg class="ig" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5.2"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1" fill="#fff" stroke="none"/></svg>
+      <span class="txt">Follow on Instagram</span>
+      <svg class="arr" viewBox="0 0 18 18" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14L14 4M6 4h8v8"/></svg>
+    </a>
+
+    <!-- link cards -->
+    <div class="links" id="links">
+      <a class="card pre" href="https://instagram.com/rockagency" target="_blank" rel="noopener">
+        <div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5.2"/><circle cx="12" cy="12" r="4.2"/><circle class="f" cx="17.4" cy="6.6" r="1.1"/></svg></div>
+        <div class="t"><b>Instagram</b><span>@rockagency</span></div>
+        <svg class="go" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+      </a>
+      <a class="card pre" href="https://youtube.com/@rockagency" target="_blank" rel="noopener">
+        <div class="ico"><svg viewBox="0 0 24 24"><rect class="f" x="2.5" y="5" width="19" height="14" rx="4.2"/><path class="k" d="M10 9.2v5.6l5-2.8z" fill="#ebebeb" stroke="none"/></svg></div>
+        <div class="t"><b>YouTube</b><span>Watch our latest videos</span></div>
+        <svg class="go" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+      </a>
+      <a class="card pre" href="https://wa.me/910000000000" target="_blank" rel="noopener">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M3.5 20.5l1.3-4.4A8.5 8.5 0 1 1 8 19.3z"/><path d="M9 8.5c0 3.5 3 6.5 6.5 6.5l1.2-1.6-2.2-1.1-.9.8c-1-.4-1.9-1.3-2.3-2.3l.8-.9-1-2.2z"/></svg></div>
+        <div class="t"><b>WhatsApp</b><span>Chat with us</span></div>
+        <svg class="go" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+      </a>
+      <a class="card pre" href="#portfolio">
+        <div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.6"/><path d="M8.5 7V5.6A1.6 1.6 0 0 1 10.1 4h3.8a1.6 1.6 0 0 1 1.6 1.6V7"/><path d="M3 13h18"/><rect x="10.3" y="11.6" width="3.4" height="3" rx=".6" fill="none"/></svg></div>
+        <div class="t"><b>Our Portfolio</b><span>Explore our work</span></div>
+        <svg class="go" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+      </a>
+      <a class="card pre" href="#latest">
+        <div class="ico"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/></svg></div>
+        <div class="t"><b>Latest Project</b><span>See what we're building</span></div>
+        <svg class="go" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+      </a>
+      <a class="card pre" href="mailto:hello@rockagency.com">
+        <div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.6"/><path d="M3.5 7.5L12 13.5l8.5-6"/></svg></div>
+        <div class="t"><b>Contact Me</b><span>Let's work together</span></div>
+        <svg class="go" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+
+    <!-- socials -->
+    <div class="social" id="social">
+      <a class="pre" href="#" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M13.5 21v-7.6h2.6l.4-3h-3V8.5c0-.9.3-1.5 1.5-1.5h1.6V4.3c-.3 0-1.2-.1-2.3-.1-2.3 0-3.8 1.4-3.8 3.9v2.3H8v3h2.5V21z"/></svg></a>
+      <a class="pre" href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 7.2A4.8 4.8 0 1 0 12 16.8 4.8 4.8 0 0 0 12 7.2zm0 7.9a3.1 3.1 0 1 1 0-6.2 3.1 3.1 0 0 1 0 6.2zM16.9 6a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2zM12 3.2c-2.4 0-2.7 0-3.6.1-2.6.1-4 1.6-4.1 4.1-.1 1-.1 1.2-.1 3.6s0 2.7.1 3.6c.1 2.5 1.5 4 4.1 4.1.9.1 1.2.1 3.6.1s2.7 0 3.6-.1c2.5-.1 4-1.5 4.1-4.1.1-.9.1-1.2.1-3.6s0-2.7-.1-3.6c-.1-2.5-1.5-4-4.1-4.1-.9-.1-1.2-.1-3.6-.1zm0 1.6c2.4 0 2.6 0 3.5.1 1.7.1 2.5.9 2.6 2.6.1.9.1 1.2.1 3.5s0 2.6-.1 3.5c-.1 1.7-.9 2.5-2.6 2.6-.9.1-1.2.1-3.5.1s-2.6 0-3.5-.1c-1.7-.1-2.5-.9-2.6-2.6-.1-.9-.1-1.2-.1-3.5s0-2.6.1-3.5C5.9 5.8 6.7 5 8.5 4.9c.9-.1 1.1-.1 3.5-.1z"/></svg></a>
+      <a class="pre" href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path d="M5.2 9.2h2.9V19H5.2zM6.6 4.6a1.7 1.7 0 1 1 0 3.4 1.7 1.7 0 0 1 0-3.4zM10 9.2h2.8v1.3c.4-.8 1.4-1.5 2.9-1.5 3 0 3.5 2 3.5 4.5V19h-2.9v-4.9c0-1.2 0-2.7-1.7-2.7s-1.9 1.3-1.9 2.600V19H10z"/></svg></a>
+      <a class="pre" href="#" aria-label="YouTube"><svg viewBox="0 0 24 24"><path d="M21.6 7.6a2.5 2.5 0 0 0-1.8-1.8C18.200 5.400 12 5.400 12 5.400s-6.200 0-7.800.4A2.500 2.500 0 0 0 2.400 7.600C2 9.200 2 12 2 12s0 2.800.4 4.400a2.500 2.500 0 0 0 1.800 1.800c1.600.4 7.800.4 7.800.4s6.200 0 7.800-.4a2.500 2.500 0 0 0 1.800-1.800c.4-1.600.4-4.400.4-4.400s0-2.800-.4-4.400zM10 15V9l5.200 3z"/></svg></a>
+    </div>
+    <p class="center tag pre" id="tag">CREATIVE<i>/</i>STRATEGY<i>/</i>DEVELOPMENT</p>
+
+    <!-- dunes -->
+    <svg class="dunes" id="dunes" viewBox="0 0 749 125" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="d1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9cdbd"/><stop offset="1" stop-color="#bfae98"/></linearGradient>
+        <linearGradient id="d2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8dfd2"/><stop offset="1" stop-color="#cfc0ab"/></linearGradient>
+      </defs>
+      <g id="duneBack"><path d="M-40 70 C60 20 130 10 200 40 C270 70 330 40 420 25 C520 8 620 40 800 60 L800 125 L-40 125Z" fill="url(#d1)" opacity=".75"/></g>
+      <g id="duneFront"><path d="M-40 105 C40 60 110 55 180 78 C260 104 340 82 420 70 C520 56 640 70 800 98 L800 130 L-40 130Z" fill="url(#d2)"/>
+        <path d="M0 112 C70 84 140 88 210 100 M300 98 C380 80 450 82 520 96 M560 90 C620 78 690 82 749 96" stroke="#fff" stroke-opacity=".35" stroke-width="2" fill="none"/></g>
+    </svg>
+  </div></div>
+</div>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const phone = document.getElementById('phone');
+
+  /* ---------- 1. Fit to a phone ratio (749 : 1600) ---------- */
+  function fit(){
+    const mobile = innerWidth < 600;
+    const w = mobile ? innerWidth : Math.min(innerWidth - 24, (innerHeight - 24) * 749 / 1600, 430);
+    const u = w / 749;
+    document.documentElement.style.setProperty('--u', u + 'px');
+    // on real phones, fill the screen height and let content scroll if needed
+    phone.style.height = mobile ? innerHeight + 'px' : (1600 * u) + 'px';
+    phone.style.width  = mobile ? '100vw' : (749 * u) + 'px';
+  }
+  addEventListener('resize', fit); fit();
+
+  /* ---------- 2. Living drip header (path rebuilt every frame) ---------- */
+  const path = document.getElementById('dripPath');
+  const drop = document.getElementById('drop');
+  const drop2 = document.getElementById('drop2');
+  function buildPath(t, grow){
+    const a = grow;                                   // 0..1 entrance growth
+    const L  = (250 - 200) * a + 200 + Math.sin(t * 1.3) * 7 * a;     // big drip tip
+    const L2 = 205 + (Math.sin(t * 0.9 + 1) * 5 + 8) * a;             // left bulge
+    const w  = Math.sin(t * 1.1) * 4;
+    const s  = (v) => 200 + (v - 200) * a;
+    return `M0,0 H749 V${55*a} C${700-w},${45*a} 678,${70*a} 672,${100*a}
+      C668,${125*a} 640,${120*a} 632,${145*a} C626,${170*a} 610,${185*a} 604,${200*a}
+      C602,${L*0.92} 598,${L} 588,${L} C576,${L} 572,${L*0.9} 574,${195*a}
+      C575,${178*a} 560,${172*a} 540,${176*a} L470,${180*a} L280,${180*a}
+      C230,${186*a} 190,${L2+8*a} 160,${L2-2*a} C130,${(196+Math.sin(t)*3)*a} 122,${166*a} 100,${162*a}
+      C60,${165*a} 30,${190*a} 0,${205*a} Z`;
+  }
+  let grow = reduce ? 1 : 0, dropT = 0, dropState = 0;
+  const t0 = performance.now();
+  (function loop(now){
+    const t = (now - t0) / 1000;
+    if (grow < 1) grow = Math.min(1, grow + 0.018);
+    const e = 1 - Math.pow(1 - grow, 3);
+    path.setAttribute('d', buildPath(t, e));
+    // droplet near the right edge: slow float + occasional falling droplet from the main drip
+    drop.setAttribute('cy', 162 + Math.sin(t * 1.6) * 3.5);
+    drop.setAttribute('opacity', e);
+    // falling droplet cycle
+    dropT += 0.016;
+    const cycle = dropT % 6;
+    if (cycle < 2.2 && grow >= 1) {
+      const p = cycle / 2.2;
+      const y = 252 + p * p * 90;
+      drop2.setAttribute('cx', 588);
+      drop2.setAttribute('cy', y);
+      drop2.setAttribute('ry', 8 + p * 5);
+      drop2.setAttribute('opacity', p < .1 ? p * 10 : 1 - Math.max(0, (p - .6) / .4));
+    } else drop2.setAttribute('opacity', 0);
+    requestAnimationFrame(loop);
+  })(t0);
+
+  /* ---------- 3. Entrance sequence (Web Animations API) ---------- */
+  const ease = 'cubic-bezier(.2,.9,.25,1)';
+  function rise(el, delay, dist = 26, dur = 700){
+    if (reduce) { el.style.opacity = 1; return; }
+    el.animate(
+      [{opacity:0, transform:`translateY(${dist}px) scale(.98)`, filter:'blur(4px)'},
+       {opacity:1, transform:'translateY(0) scale(1)', filter:'blur(0)'}],
+      {duration:dur, delay, easing:ease, fill:'both'}
+    ).onfinish = () => { el.classList.remove('pre'); el.style.opacity = 1; };
+  }
+
+  // avatar pops in with overshoot, then floats
+  const av = document.getElementById('avatarWrap');
+  if (!reduce) {
+    av.animate(
+      [{opacity:0, transform:'scale(.3) translateY(-30px) rotate(-12deg)'},
+       {opacity:1, transform:'scale(1.08) translateY(0) rotate(3deg)', offset:.65},
+       {opacity:1, transform:'scale(1) translateY(0) rotate(0)'}],
+      {duration:1000, delay:350, easing:'cubic-bezier(.3,1.2,.4,1)', fill:'both'}
+    ).onfinish = () => {
+      av.classList.remove('pre'); av.style.opacity = 1;
+      av.animate(
+        [{transform:'translateY(0)'},{transform:'translateY(-6px)'},{transform:'translateY(0)'}],
+        {duration:4200, iterations:Infinity, easing:'ease-in-out'}
+      );
+    };
+  } else av.style.opacity = 1;
+
+  rise(document.getElementById('name'), 800);
+  rise(document.getElementById('bio'), 920);
+
+  // verified badge spin + periodic pulse
+  const badge = document.getElementById('badge');
+  if (!reduce) {
+    badge.animate([{transform:'scale(0) rotate(-180deg)'},{transform:'scale(1.25) rotate(20deg)',offset:.7},{transform:'scale(1) rotate(0)'}],
+      {duration:800, delay:1200, easing:'ease-out', fill:'backwards'});
+    setInterval(() => badge.animate(
+      [{transform:'scale(1) rotate(0)'},{transform:'scale(1.2) rotate(15deg)'},{transform:'scale(1) rotate(0)'}],
+      {duration:700, easing:'ease-in-out'}), 5000);
+  }
+
+  // stats
+  document.querySelectorAll('.stat').forEach((s, i) => {
+    rise(s, 1050 + i * 120, 20, 600);
+    const b = s.querySelector('b');
+    const target = parseFloat(b.dataset.count), dec = +(b.dataset.dec || 0), suf = b.dataset.suffix || '';
+    if (reduce) { b.textContent = target.toFixed(dec) + suf; return; }
+    const start = performance.now() + 1100 + i * 120, dur = 1400;
+    (function tick(n){
+      const p = Math.min(1, Math.max(0, (n - start) / dur));
+      const v = target * (1 - Math.pow(1 - p, 4));
+      b.textContent = v.toFixed(dec) + suf;
+      if (p < 1) requestAnimationFrame(tick);
+    })(performance.now());
+  });
+
+  rise(document.getElementById('follow'), 1400, 30, 750);
+
+  // cards stagger (alternate slide from left / right)
+  document.querySelectorAll('.card').forEach((c, i) => {
+    const side = i % 2 ? 40 : -40;
+    if (reduce) { c.style.opacity = 1; return; }
+    c.animate(
+      [{opacity:0, transform:`translateX(${side}px) scale(.96)`},
+       {opacity:1, transform:'translateX(0) scale(1)'}],
+      {duration:700, delay:1550 + i * 110, easing:ease, fill:'both'}
+    ).onfinish = () => { c.classList.remove('pre'); c.style.opacity = 1; c.style.transform = ''; };
+  });
+
+  document.querySelectorAll('.social a').forEach((a, i) => {
+    if (reduce) { a.style.opacity = 1; return; }
+    a.animate([{opacity:0, transform:'scale(0) rotate(-90deg)'},{opacity:1, transform:'scale(1.2) rotate(8deg)',offset:.7},{opacity:1, transform:'scale(1) rotate(0)'}],
+      {duration:600, delay:2300 + i * 90, easing:'ease-out', fill:'both'}).onfinish = () => { a.classList.remove('pre'); a.style.opacity = 1; a.style.transform = ''; };
+  });
+  const tag = document.getElementById('tag');
+  rise(tag, 2700, 10, 800);
+
+  /* ---------- 4. Ripple on click ---------- */
+  document.querySelectorAll('.card, .follow').forEach(el => {
+    el.addEventListener('pointerdown', e => {
+      const r = el.getBoundingClientRect();
+      const size = Math.max(r.width, r.height) * 2;
+      const sp = document.createElement('span');
+      sp.className = 'ripple';
+      sp.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - r.left - size/2}px;top:${e.clientY - r.top - size/2}px`;
+      el.appendChild(sp);
+      setTimeout(() => sp.remove(), 700);
+    });
+    // placeholder anchors don't jump
+    el.addEventListener('click', e => { if ((el.getAttribute('href') || '').startsWith('#')) e.preventDefault(); });
+  });
+
+  /* ---------- 5. 3D tilt on cards (pointer) ---------- */
+  if (!reduce && matchMedia('(hover:hover)').matches) {
+    document.querySelectorAll('.card').forEach(c => {
+      c.addEventListener('pointermove', e => {
+        const r = c.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+        c.style.transform = `perspective(700px) rotateX(${-y * 6}deg) rotateY(${x * 6}deg) translateY(-3px)`;
+      });
+      c.addEventListener('pointerleave', () => c.style.transform = '');
+    });
+  }
+
+  /* ---------- 6. Parallax: dunes + avatar follow pointer / device tilt ---------- */
+  const duneB = document.getElementById('duneBack'), duneF = document.getElementById('duneFront');
+  const avatar = document.getElementById('avatar');
+  let tx = 0, ty = 0, cx = 0, cy = 0;
+  function setTarget(x, y){ tx = x; ty = y; }
+  phone.addEventListener('pointermove', e => {
+    const r = phone.getBoundingClientRect();
+    setTarget((e.clientX - r.left) / r.width - .5, (e.clientY - r.top) / r.height - .5);
+  });
+  addEventListener('deviceorientation', e => {
+    if (e.gamma == null) return;
+    setTarget(Math.max(-.5, Math.min(.5, e.gamma / 60)), Math.max(-.5, Math.min(.5, (e.beta - 45) / 90)));
+  });
+  if (!reduce) (function par(){
+    cx += (tx - cx) * .08; cy += (ty - cy) * .08;
+    duneB.setAttribute('transform', `translate(${cx * -22},0)`);
+    duneF.setAttribute('transform', `translate(${cx * 34},0)`);
+    avatar.style.transform = `translate(${cx * 6}px, ${cy * 4}px)`;
+    requestAnimationFrame(par);
+  })();
+
+  /* ---------- 7. Scroll hint: header drips stretch slightly on scroll ---------- */
+  const sc = document.querySelector('.scroll');
+  sc.addEventListener('scroll', () => {
+    const s = Math.min(sc.scrollTop, 120);
+    document.getElementById('dripSvg').style.transform = `translateY(${-s * .3}px)`;
+  }, {passive:true});
+})();
+</script>
+</body>
+</html>

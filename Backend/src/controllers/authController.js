@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 const { z } = require('zod')
 const User = require('../models/User')
 const config = require('../config/env')
+const { sessionCookieOptions, clearSessionCookieOptions } = require('../services/session')
 
 const registerSchema = z.object({
   firstName: z.string().trim().min(1).max(80),
@@ -29,15 +30,18 @@ function publicUser(user) {
   }
 }
 
-function setSessionCookie(res, userId) {
-  const token = jwt.sign({ sub: userId.toString() }, config.jwtSecret, { expiresIn: '7d' })
-  res.cookie(config.cookieName, token, {
-    httpOnly: true,
-    secure: config.isProduction,
-    sameSite: config.isProduction ? 'strict' : 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    path: '/',
+/**
+ * Issue a session for the given user.
+ *
+ * The token's expiry and the cookie's lifetime come from the same place, so
+ * the session cannot end before the cookie does - which is what used to
+ * happen when the two were written out separately.
+ */
+function setSessionCookie(req, res, userId) {
+  const token = jwt.sign({ sub: userId.toString() }, config.jwtSecret, {
+    expiresIn: config.sessionTtlSeconds,
   })
+  res.cookie(config.cookieName, token, sessionCookieOptions(req))
 }
 
 async function register(req, res) {
@@ -48,7 +52,7 @@ async function register(req, res) {
 
   const passwordHash = await bcrypt.hash(data.password, 12)
   const user = await User.create({ ...data, email, passwordHash })
-  setSessionCookie(res, user._id)
+  setSessionCookie(req, res, user._id)
   return res.status(201).json({ user: publicUser(user) })
 }
 
@@ -58,7 +62,7 @@ async function login(req, res) {
   if (!user || !(await bcrypt.compare(data.password, user.passwordHash))) {
     return res.status(401).json({ message: 'Invalid email or password.' })
   }
-  setSessionCookie(res, user._id)
+  setSessionCookie(req, res, user._id)
   return res.json({ user: publicUser(user) })
 }
 
@@ -69,12 +73,7 @@ async function getCurrentUser(req, res) {
 }
 
 function logout(req, res) {
-  res.clearCookie(config.cookieName, {
-    httpOnly: true,
-    secure: config.isProduction,
-    sameSite: config.isProduction ? 'strict' : 'lax',
-    path: '/',
-  })
+  res.clearCookie(config.cookieName, clearSessionCookieOptions(req))
   return res.status(204).send()
 }
 

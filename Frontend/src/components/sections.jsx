@@ -1,6 +1,13 @@
 import { assetUrl } from '../lib/api'
 import { SocialGlyph, ArrowRightIcon, ExternalIcon, CartIcon, DownloadIcon, PlayIcon, HeartIcon, StarIcon, MailIcon } from './icons'
 import { PLATFORM_LABELS } from './platforms'
+import { useMemo } from 'react'
+import pinkHtml from '../html-designs/pink_profile.html?raw'
+import purpleHtml from '../html-designs/purple_profile.html?raw'
+import nightHtml from '../html-designs/nightblue_profile.html?raw'
+import skyHtml from '../html-designs/blueSKY_profile.html?raw'
+import inkHtml from '../html-designs/black_profile.html?raw'
+import { extractFields, normalizeHref } from '../lib/htmlFields'
 
 /**
  * The individual section renderers.
@@ -499,8 +506,117 @@ function sectionFrameStyle(props, tokens) {
     fontFamily: typography.bodyFont,
   }
 }
+/* -------------------------------------------------------------------------- */
+/* Designed pages: a finished HTML design shown in a sandboxed frame           */
+/* -------------------------------------------------------------------------- */
+
+export const DESIGNS = {
+  pink:      { html: pinkHtml,   ratio: '430 / 860', name: 'h1.name',    brand: '.brand', bio: 'p.bio', avatar: '.av' },
+  purple:    { html: purpleHtml, ratio: '430 / 905', name: '#title',                       bio: '#bio',  avatar: '.avatar' },
+  nightblue: { html: nightHtml,  ratio: '430 / 921', name: 'h1.name', first: true,         bio: '.bio',  avatar: '.avatar div' },
+  bluesky:   { html: skyHtml,    ratio: '430 / 917', name: '#name span',                   bio: '#bio',  avatar: '.avatar' },
+  ink:       { html: inkHtml,    ratio: '430 / 918', name: '#name span',                   bio: '#bio',  avatar: '#avatar' },
+}
+
+
+function buildSrcDoc(design, values) {
+  const data = JSON.stringify({
+    sel: { name: design.name, brand: design.brand || '', bio: design.bio, avatar: design.avatar, first: Boolean(design.first) },
+    name: values.name,
+    bio: values.bio,
+    image: values.image,
+    edits: values.edits || {},
+  }).replace(/</g, '\\u003c')
+
+  const fontLinks = (values.fonts || [])
+    .map((f) => `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${encodeURIComponent(f).replace(/%20/g, '+')}&display=swap">`)
+    .join('')
+
+  // Values are only written with nodeValue, textContent, style or href, never as markup.
+  const script = `<script>(function(){var d=${data};var done=false;
+var extract=${extractFields.toString()};
+var fixHref=${normalizeHref.toString()};
+function q(s){return s?document.querySelector(s):null}
+var sized=[];
+function resize(){sized.forEach(function(o){o.el.style.fontSize='';var c=parseFloat(getComputedStyle(o.el).fontSize);if(c)o.el.style.fontSize=(c*o.k)+'px'})}
+function go(){if(done)return;done=true;
+var ex=extract(document.body);
+if(d.name){var n=q(d.sel.name);if(n){if(d.sel.first){for(var i=0;i<n.childNodes.length;i++){var c=n.childNodes[i];if(c.nodeType===3&&c.nodeValue.trim()){c.nodeValue=d.name;break}}}else{n.textContent=d.name}}
+var b=q(d.sel.brand);if(b)b.textContent=d.name}
+if(d.bio){var p=q(d.sel.bio);if(p)p.textContent=d.bio}
+if(d.image){var a=q(d.sel.avatar);if(a){var im=document.createElement('img');im.src=d.image;im.alt='';im.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:9;border-radius:inherit';a.appendChild(im)}}
+ex.texts.forEach(function(node,i){var e=d.edits['t'+i];if(!e)return;
+if(e.text){var m=node.nodeValue.match(/^(\\s*)[\\s\\S]*?(\\s*)$/);node.nodeValue=(m?m[1]:'')+e.text+(m?m[2]:'')}
+var el=node.parentElement;if(!el)return;var s=el.style;
+if(e.font)s.fontFamily='"'+e.font+'",sans-serif';
+if(e.weight)s.fontWeight=e.weight;
+if(e.lh)s.lineHeight=e.lh;
+if(e.ls)s.letterSpacing=(Number(e.ls)/100)+'em';
+if(e.color)s.color=e.color;
+if(e.align)s.textAlign=e.align;
+if(e.size&&Number(e.size)!==100)sized.push({el:el,k:Number(e.size)/100})});
+ex.links.forEach(function(el,i){var e=d.edits['l'+i];if(!e)return;
+if(e.del){el.style.display='none';return}
+if(e.href){var h=fixHref(e.href);if(h){el.setAttribute('href',h);if(h.charAt(0)!=='#'){el.setAttribute('target','_blank');el.setAttribute('rel','noopener noreferrer')}}}});
+resize();addEventListener('resize',resize)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();
+addEventListener('load',function(){go();resize()})})()<\/script>`
+
+  const end = design.html.lastIndexOf('</body>')
+  const injected = fontLinks + script
+  return end < 0 ? design.html + injected : design.html.slice(0, end) + injected + design.html.slice(end)
+}
+
+const EDIT_KEYS = ['text', 'href', 'del', 'font', 'size', 'weight', 'lh', 'ls', 'color', 'align']
+
+function HtmlPageSection({ props }) {
+  const design = DESIGNS[props.style] || DESIGNS.pink
+  const image = props.image ? new URL(assetUrl(props.image), window.location.href).href : ''
+  const editsKey = JSON.stringify(props.edits || [])
+
+  const srcDoc = useMemo(() => {
+    const edits = {}
+    for (const entry of JSON.parse(editsKey)) {
+      const e = {}
+      for (const key of EDIT_KEYS) if (entry[key]) e[key] = entry[key]
+      if (Object.keys(e).length) edits[entry.id] = e
+    }
+    const fonts = [...new Set(Object.values(edits).map((e) => e.font).filter(Boolean))]
+    return buildSrcDoc(design, { name: props.name || '', bio: props.bio || '', image, edits, fonts })
+  }, [design, props.name, props.bio, image, editsKey])
+
+  const extra = (props.extra || []).filter((link) => link.text)
+
+  return (
+    <>
+      <div className="lx-htmlpage" style={{ aspectRatio: design.ratio }}>
+        <iframe
+          title="Designed page"
+          srcDoc={srcDoc}
+          sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
+        />
+      </div>
+      {extra.length ? (
+        <div className="lx-extra-links">
+          {extra.map((link) => (
+            <a
+              key={link.id}
+              className="lx-extra-link"
+              href={normalizeHref(link.href) || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {link.text}
+            </a>
+          ))}
+        </div>
+      ) : null}
+    </>
+  )
+}
 
 /* -------------------------------------------------------------------------- */
+
 
 const RENDERERS = {
   profile: ProfileSection,
@@ -514,7 +630,9 @@ const RENDERERS = {
   contact: ContactSection,
   divider: DividerSection,
   spacer: SpacerSection,
+  'html-page': HtmlPageSection,
 }
+
 
 /** Render one section. Unknown types render nothing rather than throwing. */
 export function SectionView({ section, tokens }) {
@@ -524,7 +642,7 @@ export function SectionView({ section, tokens }) {
 
   return (
     <div className="lx-section" style={sectionFrameStyle(props, tokens)}>
-      <Renderer props={props} tokens={tokens} />
+         <Renderer props={props} tokens={tokens} sectionId={section.id} />
     </div>
   )
 }

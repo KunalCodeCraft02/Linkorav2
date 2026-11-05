@@ -109,6 +109,8 @@ function serializeSummary(website) {
     themeId: resolved.site.themeId,
     sectionCount: resolved.sections.length,
     colors: resolved.tokens.colors,
+    site: resolved.site,
+    sections: resolved.sections,
     publishedAt: website.publishedAt || null,
     createdAt: website.createdAt,
     updatedAt: website.updatedAt,

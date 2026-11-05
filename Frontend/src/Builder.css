@@ -49,21 +49,49 @@
   font-family: inherit;
 }
 
-.preview-frame {
+/* The stage centres the frame and lets it scroll, so a tall page scrolls
+   inside the frame instead of stretching it past the viewport. */
+.preview-stage {
   flex: 1;
-  width: min(100% - 48px, 940px);
-  margin: 28px auto;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: auto;
+  padding: 28px 24px 40px;
+}
+
+.preview-frame {
+  flex: none;
   background: #fff;
   border: 1px solid #e2e0d8;
   border-radius: 18px;
   box-shadow: 0 2px 4px rgba(29, 27, 46, .06), 0 24px 60px -30px rgba(29, 27, 46, .45);
   overflow: hidden;
-  min-height: 0;
   display: flex;
+  flex-direction: column;
+  /* A phone-shaped frame. The height is capped so the frame reads as a
+     handset rather than a long scrolling column, and the page inside it
+     scrolls. The viewport term keeps the frame inside the window even
+     when the toolbar wraps onto a second row. */
+  height: min(780px, calc(100svh - 130px));
 }
 
-.preview-frame.is-mobile {
-  width: min(100% - 48px, 390px);
+/* The desktop frame is sized to the width the document's content is
+   actually drawn at, so the preview never shows a wide band of empty page
+   beside the content. The canvas carries its own padding, so the frame only
+   needs to add the border. */
+.preview-frame--desktop {
+  width: min(100%, calc(var(--preview-content-width, 540px) + 2px));
+}
+
+.preview-frame--tablet {
+  width: min(100%, 620px);
+}
+
+.preview-frame--mobile {
+  width: min(100%, 390px);
+  border-radius: 26px;
 }
 
 .preview-frame .website-canvas {
@@ -71,6 +99,10 @@
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  /* The canvas is capped at the document's content width, so on a wider
+     frame it has to be centred rather than left against the edge. */
+  margin: 0 auto;
+  width: 100%;
 }
 
 /* Published public page ---------------------------------------------------- */
@@ -131,7 +163,7 @@
 @media (max-width: 640px) {
   .preview-toolbar { height: auto; min-height: 60px; flex-wrap: wrap; padding: 10px 14px; }
   .preview-toolbar__title { order: 3; width: 100%; }
-  .preview-frame,
-  .preview-frame.is-mobile { width: calc(100% - 20px); margin: 12px auto; }
+  .preview-stage { padding: 12px 10px 24px; }
+  .preview-frame { height: auto; max-height: none; }
   .public-site { padding: 20px 12px 56px; }
 }

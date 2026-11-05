@@ -126,6 +126,7 @@ const STYLE_OPTIONS = {
   'social-links': ['icons', 'pills', 'labeled', 'plain'],
   contact: ['inline', 'stacked', 'cards'],
   divider: ['solid', 'dashed', 'dotted', 'gradient'],
+  'html-page': ['pink', 'purple', 'nightblue', 'bluesky', 'ink'],
 }
 
 /**

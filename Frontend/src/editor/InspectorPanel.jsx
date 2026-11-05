@@ -4,6 +4,7 @@ import { SOCIAL_PLATFORMS } from '../../../shared/website-schema.mjs'
 import { PLATFORM_LABELS } from '../components/platforms'
 import { ArrowUpIcon, ArrowDownIcon, CloseIcon, PlusIcon } from '../components/icons'
 import { ImageField } from './ImageField'
+import HtmlPageEditor from './HtmlPageEditor'
 
 /**
  * The properties inspector.
@@ -389,6 +390,9 @@ export default function InspectorPanel({
           ))}
         </section>
       ))}
+      {selected.type === 'html-page' ? (
+        <HtmlPageEditor props={props} onChangeProp={onChangeProp} />
+      ) : null}
     </aside>
   )
 }

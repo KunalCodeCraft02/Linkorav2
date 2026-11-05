@@ -190,6 +190,7 @@ export const SECTION_TYPES = [
   'contact',
   'divider',
   'spacer',
+  'html-page',
 ]
 
 export const SECTION_TYPE_SET = new Set(SECTION_TYPES)
@@ -422,7 +423,44 @@ export const SECTION_DEFS = {
       ...common,
       height: number(4, 320, 48),
     },
+  },  'html-page': {
+    label: 'Designed page',
+    group: 'website',
+    icon: 'grid',
+    description: 'A fully designed page. Edit every text and link, plus the name, bio and photo.',
+    spec: {
+      ...common,
+      style: enumOf(['pink', 'purple', 'nightblue', 'bluesky', 'ink'], 'pink'),
+      name: string(80, ''),
+      bio: text(400, ''),
+      image: url(''),
+            edits: list(
+        object({
+          id: string(20, ''),
+          text: text(600, ''),
+          href: string(300, ''),
+          del: string(1, ''),
+          font: string(60, ''),
+          size: string(6, ''),
+          weight: string(4, ''),
+          lh: string(6, ''),
+          ls: string(6, ''),
+          color: string(9, ''),
+          align: string(6, ''),
+        }),
+        300,
+      ),
+      extra: list(
+        object({
+          id: string(20, ''),
+          text: string(60, ''),
+          href: string(300, ''),
+        }),
+        20,
+      ),
+    },
   },
+  
 }
 
 /** The sidebar groups, in the order they appear. */

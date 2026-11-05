@@ -8,6 +8,7 @@ const authRoutes = require('./routes/authRoutes')
 const websiteRoutes = require('./routes/websiteRoutes')
 const { frontendCors } = require('./middleware/cors')
 const errorHandler = require('./middleware/errorHandler')
+const { warnAboutUnusableSessionCookie } = require('./services/session')
 const morgan = require('morgan')
 
 const app = express()
@@ -34,6 +35,7 @@ app.use(errorHandler)
 
 async function start() {
   await connectDatabase()
+  warnAboutUnusableSessionCookie()
   app.listen(config.port, () => console.log(`Linkora API listening on port ${config.port}`))
 }
 

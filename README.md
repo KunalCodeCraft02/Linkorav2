@@ -1,8 +1,14 @@
+<div align="center">
+
 # Linkora
 
 **A link-in-bio and mini-website builder.** Pick one of fourteen hand-designed
 templates, edit every block in a live three-panel editor, and publish to a
 public URL that anyone can visit without an account.
+
+</div>
+
+## Features
 
 - **14 templates** across 10 categories — creator, developer, freelancer,
   business, product launch, artist, musician, coach, restaurant, event.
@@ -18,17 +24,19 @@ public URL that anyone can visit without an account.
 
 ## Contents
 
-- [Quick start](#quick-start)
-- [Architecture](#architecture)
-- [The shared schema](#the-shared-schema)
-- [Templates](#templates)
-- [Themes](#themes)
-- [The editor](#the-editor)
-- [API](#api)
-- [Data model](#data-model)
-- [Configuration](#configuration)
-- [Verification](#verification)
-- [Known limitations](#known-limitations)
+| Section | What it covers |
+| --- | --- |
+| [Quick start](#quick-start) | Getting it running locally |
+| [Architecture](#architecture) | How the frontend and backend fit together |
+| [The shared schema](#the-shared-schema) | One specification, two consumers |
+| [Templates](#templates) | The fourteen templates and their categories |
+| [Themes](#themes) | The ten presets and how tokens are resolved |
+| [The editor](#the-editor) | The three panels, saving, and undo/redo |
+| [API](#api) | Every route, public and authenticated |
+| [Data model](#data-model) | The `User` and `Website` documents |
+| [Configuration](#configuration) | Every environment variable |
+| [Verification](#verification) | The six test suites |
+| [Known limitations](#known-limitations) | What this build does not do |
 
 ---
 
@@ -75,37 +83,37 @@ The backend serves the API and the uploaded assets. Point a web server at
 
 ```
 Linkora/
-├── shared/                     # used by BOTH the frontend and the backend
-│   ├── website-schema.mjs      # the document schema + the validation specs
-│   ├── templates.mjs           # the 14 template definitions
-│   ├── themes.mjs              # the 10 theme presets + token resolution
-│   ├── resolve.mjs             # document -> resolved design tokens
-│   └── inspector.mjs           # per-element property specs for the editor
+├── shared/                          # used by BOTH the frontend and the backend
+│   ├── website-schema.mjs           # the document schema + the validation specs
+│   ├── templates.mjs                # the 14 template definitions
+│   ├── themes.mjs                   # the 10 theme presets + token resolution
+│   ├── resolve.mjs                  # document -> resolved design tokens
+│   └── inspector.mjs                # per-element property specs for the editor
 │
-├── Backend/                    # Node + Express + Mongoose (CommonJS)
+├── Backend/                         # Node + Express + Mongoose (CommonJS)
 │   ├── src/
-│   │   ├── server.js           # app wiring
-│   │   ├── config/             # env + database
-│   │   ├── models/             # User, Website
-│   │   ├── controllers/        # authController, websiteController
-│   │   ├── routes/             # authRoutes, websiteRoutes
-│   │   ├── middleware/         # requireAuth, rate limiters, upload, errors
-│   │   └── services/           # slugService
-│   └── scripts/                # the verification suites (see below)
+│   │   ├── server.js                # app wiring
+│   │   ├── config/                  # env + database
+│   │   ├── models/                  # User, Website
+│   │   ├── controllers/             # authController, websiteController
+│   │   ├── routes/                  # authRoutes, websiteRoutes
+│   │   ├── middleware/              # requireAuth, rate limiters, upload, errors
+│   │   └── services/                # slugService
+│   └── scripts/                     # the verification suites (see below)
 │
-└── Frontend/                   # React + Vite (JavaScript, JSX)
+└── Frontend/                        # React + Vite (JavaScript, JSX)
     └── src/
-        ├── pages/              # landing, auth, dashboard, templates,
-        │                       # builder, preview, public website
-        ├── editor/             # the editor's building blocks
-        │   ├── EditorCanvas.jsx    # the live canvas + drag and drop
-        │   ├── LeftSidebar.jsx     # blocks, templates, themes, settings
-        │   ├── InspectorPanel.jsx  # the right-hand property panel
-        │   ├── SettingsPanel.jsx   # site-wide theme and SEO settings
-        │   ├── ImageField.jsx      # upload / replace / crop
-        │   ├── useDocumentHistory.js  # the document + undo/redo
-        │   └── useAutosave.js         # debounced, race-safe saving
-        └── components/         # sections, icons, renderers
+        ├── pages/                   # landing, auth, dashboard, templates,
+        │                            # builder, preview, public website
+        ├── editor/                  # the editor's building blocks
+        │   ├── EditorCanvas.jsx         # the live canvas + drag and drop
+        │   ├── LeftSidebar.jsx          # blocks, templates, themes, settings
+        │   ├── InspectorPanel.jsx       # the right-hand property panel
+        │   ├── SettingsPanel.jsx        # site-wide theme and SEO settings
+        │   ├── ImageField.jsx           # upload / replace / crop
+        │   ├── useDocumentHistory.js    # the document + undo/redo
+        │   └── useAutosave.js           # debounced, race-safe saving
+        └── components/              # sections, icons, renderers
 ```
 
 The `shared/` directory is the important part. It sits next to the frontend
@@ -181,8 +189,7 @@ panel to offer a control the server would reject.
 
 ## Templates
 
-Fourteen templates, ten categories, two per category where the brief asks
-for a second take:
+Fourteen templates across ten categories:
 
 | Category | Templates |
 | --- | --- |
@@ -211,11 +218,12 @@ replace any of them with their own upload.
 
 ## Themes
 
-Ten presets, named exactly as the brief specifies:
+Ten presets:
 
-Minimal light · Editorial · Dark studio · Soft pastel · Bold creator ·
-Modern business · Retro pop · Elegant monochrome · Warm earthy ·
-Neon night
+- **Minimal Light** · **Editorial** · **Dark Studio** · **Soft Pastal** ·
+  **Bold Creator**
+- **Modern Business** · **Retro Pop** · **Elegant Monochrome** ·
+  **Warm Earthy** · **Neon Night**
 
 Each preset is a coordinated set of colours, typography, button treatment,
 borders, backgrounds, radii and spacing. Selecting a preset **clears** your
@@ -276,7 +284,7 @@ Base path: `/api`.
 ### Public
 
 | Method | Path | Notes |
-| --- | --- | --- |
+| :---: | --- | --- |
 | `GET` | `/api/websites/catalog` | the template and theme catalogue. No session needed. |
 | `GET` | `/api/websites/public/:slug` | the published snapshot. No session needed. |
 | `GET` | `/api/health` | liveness, and the database connection status. Never leaks a secret. |
@@ -284,7 +292,7 @@ Base path: `/api`.
 ### Authenticated
 
 | Method | Path | Notes |
-| --- | --- | --- |
+| :---: | --- | --- |
 | `POST` | `/api/auth/register` | creates a user, sets the session cookie |
 | `POST` | `/api/auth/login` | sets the session cookie |
 | `GET` | `/api/auth/me` | the current user |
@@ -442,8 +450,8 @@ confirm the inspector changes with the selection, edit a text block and
 watch it appear on the canvas, upload a profile photo and confirm it lands
 on the profile's own `image` property, upload a video poster and confirm it
 lands on `poster` without replacing the video's `url`, change the accent
-colour, add a block, move a
-block up, **drag a block to a new position with the mouse**, undo, redo,
+colour, add a block, move a block up, **drag a block to a new position with
+the mouse**, undo, redo,
 confirm the save indicator reports unsaved changes while an edit is queued
 and settles on "saved" afterwards, reload and confirm the order, the text
 and the new block all survived, publish, open the public URL and confirm the
@@ -499,6 +507,3 @@ and Groq features; no code reads them any more, and
   replaceable, but they are not photographs of real places or people.
 - **There is no custom domain support.** Published sites live at
   `/p/:slug` on the configured frontend origin.
-#   L i n k o r a v 2  
- #   L i n k o r a v 2  
- 

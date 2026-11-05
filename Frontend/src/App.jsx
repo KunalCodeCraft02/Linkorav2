@@ -297,7 +297,9 @@ function RequireAuth({ children }) {
     apiRequest('/auth/me')
       .then(() => setStatus('authenticated'))
       .catch(() => {
-        window.location.href = '/'
+        // The session is gone or has expired. Send the user to the login
+        // page - not the landing page - so they can get straight back in.
+        window.location.href = '/login'
       })
   }, [])
 
@@ -305,7 +307,7 @@ function RequireAuth({ children }) {
     return <main className="auth-page auth-loading"><p>Loading your Linkora home...</p></main>
   }
 
-  return status === 'authenticated' ? children : <main className="auth-page auth-loading"><p>Loading your Linkora home...</p></main>
+  return children
 }
 
 function App() {

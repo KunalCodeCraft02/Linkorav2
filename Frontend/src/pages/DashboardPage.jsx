@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { apiRequest } from '../lib/api'
 import { getTemplate } from '../../../shared/templates.mjs'
+import TemplatePreview from '../components/TemplatePreview'
 import {
   RocketIcon,
   CopyIcon,
@@ -51,6 +52,24 @@ function relativeTime(value) {
 
 function WebsiteCard({ website, onEdit, onPreview, onPublish, onUnpublish, onDuplicate, onRename, onDelete }) {
   const template = getTemplate(website.templateId)
+    const previewTemplate = useMemo(() => {
+    const s = website.site || {}
+    const base = template || {}
+    return {
+      id: website.templateId,
+      themeId: s.themeId || website.themeId || base.themeId,
+      layout: s.layout || base.layout,
+      contentWidth: s.contentWidth || base.contentWidth,
+      spacingScale: s.spacingScale || base.spacingScale,
+      radius: typeof s.radius === 'number' ? s.radius : base.radius,
+      profileLayout: s.profileLayout || base.profileLayout,
+      socialIconStyle: s.socialIconStyle || base.socialIconStyle,
+      buttonPreset: s.buttonPreset || base.buttonPreset,
+      shadow: s.shadow || base.shadow,
+      sections: website.sections || base.sections || [],
+    }
+  }, [website, template])
+
   const [menuOpen, setMenuOpen] = useState(false)
   const [renaming, setRenaming] = useState(false)
   const [nameDraft, setNameDraft] = useState(website.name)
@@ -73,21 +92,15 @@ function WebsiteCard({ website, onEdit, onPreview, onPublish, onUnpublish, onDup
     <article className="site-card">
       <div
         className="site-card__thumb"
-        style={{
-          background: website.colors?.background || '#f1f0ea',
-          borderBottomColor: website.colors?.border || '#e2e0d8',
-        }}
-      >
-        <span className="site-card__swatches" aria-hidden="true">
-          {template?.swatches?.map((colour) => (
-            <i key={colour} style={{ background: colour }} />
-          ))}
-        </span>
-        <span className={`site-card__status ${isPublished ? 'is-published' : 'is-draft'}`}>
+        style={{ position: 'relative', display: 'block', width: '100%', height: 'auto', padding: 0, background: 'none', overflow: 'hidden', borderBottom: 0 }}      >
+        <TemplatePreview template={previewTemplate} height={250} />
+        <span
+          className={`site-card__status ${isPublished ? 'is-published' : 'is-draft'}`}
+          style={{ position: 'absolute', top: 12, right: 12, zIndex: 2 }}
+        >
           {isPublished ? 'Published' : 'Draft'}
         </span>
       </div>
-
       <div className="site-card__body">
         {renaming ? (
           <form className="site-card__rename" onSubmit={submitRename}>
@@ -174,6 +187,7 @@ export default function DashboardPage() {
   const [filter, setFilter] = useState('all')
   const [pendingDelete, setPendingDelete] = useState(null)
   const [busy, setBusy] = useState('')
+  const [showAll, setShowAll] = useState(false)
 
   const load = useCallback(async () => {
     const result = await apiRequest('/websites')
@@ -201,6 +215,8 @@ export default function DashboardPage() {
     () => (filter === 'all' ? websites : websites.filter((website) => website.status === filter)),
     [filter, websites],
   )
+
+  const shown = showAll ? visible : visible.slice(0, 12)
 
   const run = useCallback(
     async (id, action, successMessage) => {
@@ -268,7 +284,7 @@ export default function DashboardPage() {
         <div className="dashboard__intro">
           <div>
             <span className="lx-eyebrow">your corner of the internet</span>
-            <h1>My websites</h1>
+            <h1>Recents</h1>
           </div>
           <div className="dashboard__stats">
             <span>
@@ -331,7 +347,7 @@ export default function DashboardPage() {
           </section>
         ) : (
           <div className="site-grid">
-            {visible.map((website) => (
+            {shown.map((website) =>(
               <WebsiteCard
                 key={website.id}
                 website={website}
@@ -352,6 +368,14 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {visible.length > 12 && !showAll ? (
+          <div style={{ textAlign: 'center', marginTop: 24 }}>
+             <button type="button" className="btn ghost" onClick={() => setShowAll(true)}>
+                Show all {visible.length}
+              </button>
+            </div>
+          ) : null}
 
       {pendingDelete ? (
         <div className="modal-backdrop" role="presentation" onClick={() => setPendingDelete(null)}>
